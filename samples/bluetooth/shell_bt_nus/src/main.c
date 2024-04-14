@@ -18,6 +18,8 @@
 #include <shell/shell_bt_nus.h>
 #include <stdio.h>
 
+#include <debug/cpu_load.h>
+
 LOG_MODULE_REGISTER(app);
 
 #define DEVICE_NAME             CONFIG_BT_DEVICE_NAME
@@ -122,6 +124,12 @@ int main(void)
 {
 	int err;
 
+	err=cpu_load_init();
+	if(err) {
+		printk("Failed to initialize CPU load module (err: %d)\n", err);
+		return 0;
+	}
+	
 	printk("Starting Bluetooth NUS shell transport example\n");
 
 	if (IS_ENABLED(CONFIG_BT_SMP)) {

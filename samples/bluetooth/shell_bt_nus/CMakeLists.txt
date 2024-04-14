@@ -11,6 +11,7 @@ project(NONE)
 # NORDIC SDK APP START
 target_sources(app PRIVATE
   src/main.c
+  src/idle_time.h  # Add this line to include your new source file
 )
 
 target_include_directories(app PRIVATE .)
