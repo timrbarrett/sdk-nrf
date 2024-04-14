@@ -16,3 +16,13 @@ target_sources(app PRIVATE
 
 target_include_directories(app PRIVATE .)
 # NORDIC SDK APP END
+
+## AD5254 driver
+zephyr_library()
+zephyr_library_sources_ifdef(
+  CONFIG_AD5254
+  ad5254.c
+  #ad5254.h
+)
+zephyr_include_directories(.)
+

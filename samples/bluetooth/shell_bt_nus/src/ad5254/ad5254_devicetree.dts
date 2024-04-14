@@ -1,0 +1,12 @@
+&i2c1 {
+    ad5254: ad5254@2C {
+        compatible = "adi,ad5254";
+        reg = <0x2C>; // I2C address
+        label = "AD5254CH1";
+    };
+    ad5254: ad5254@2F {
+        compatible = "adi,ad5254";
+        reg = <0x2F>; // I2C address
+        label = "AD5254CH2";
+    };
+};

@@ -1,0 +1,24 @@
+# In ad5254/Kconfig
+menuconfig AD5254
+    bool "AD5254 Digital Potentiometer Driver"
+    depends on I2C
+    help
+      Enable driver for AD5254 digital potentiometer.
+
+if AD5254
+
+config AD5254_I2C_ADDR
+    hex "AD5254 I2C address"
+    default 0x18
+    help
+      Specify the I2C address for the AD5254 digital potentiometer.
+
+endif
+
+#config AD5254
+#    bool "AD5254 Digital Potentiometer"
+#    depends on I2C
+#    help
+#      Say yes here to build support for Analog Devices AD5254 Digital
+#      Potentiometer. This driver can be built as a module. If so, the
+#      module will be called ad5254.
