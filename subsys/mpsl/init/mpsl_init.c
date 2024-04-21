@@ -14,6 +14,7 @@
 #include <mpsl/mpsl_assert.h>
 #include <mpsl/mpsl_work.h>
 #include "multithreading_lock.h"
+#include <nrfx.h>
 #if defined(CONFIG_NRFX_DPPI)
 #include <nrfx_dppi.h>
 #endif
@@ -48,18 +49,22 @@ extern void rtc_pretick_rtc0_isr_hook(void);
 #define MPSL_RADIO_IRQn RADIO_IRQn
 #elif defined(CONFIG_SOC_SERIES_NRF54LX)
 #define MPSL_TIMER_IRQn TIMER10_IRQn
-#define MPSL_RTC_IRQn	GRTC_3_IRQn
+#define MPSL_RTC_IRQn GRTC_3_IRQn
 #define MPSL_RADIO_IRQn RADIO_0_IRQn
 #elif defined(CONFIG_SOC_SERIES_NRF54HX)
 #define MPSL_TIMER_IRQn TIMER020_IRQn
-#define MPSL_RTC_IRQn GRTC_0_IRQn /* non-secure GRTC IRQ. */
+#define MPSL_RTC_IRQn GRTC_2_IRQn
 #define MPSL_RADIO_IRQn RADIO_0_IRQn
+#endif
 
+#if defined(CONFIG_SOC_SERIES_NRF54HX)
 /* Basic build time sanity checking */
 #define MPSL_RESERVED_GRTC_CHANNELS ((1U << 8) | (1U << 9) | (1U << 10) | (1U << 11) | (1U << 12))
-#define MPSL_RESERVED_DPPI_SOURCE_CHANNELS (1U << 0)
-#define MPSL_RESERVED_DPPI_SINK_CHANNELS (1U << 0)
-#define MPSL_RESERVED_IPCT_SOURCE_CHANNELS (1U << 0)
+#elif defined(CONFIG_SOC_SERIES_NRF54LX)
+#define MPSL_RESERVED_GRTC_CHANNELS ((1U << 7) | (1U << 8) | (1U << 9) | (1U << 10) | (1U << 11))
+#endif
+
+#if defined(CONFIG_SOC_SERIES_NRF54HX) || defined(CONFIG_SOC_SERIES_NRF54LX)
 
 BUILD_ASSERT(MPSL_RTC_IRQn != DT_IRQN(DT_NODELABEL(grtc)), "MPSL requires a dedicated GRTC IRQ");
 
@@ -72,10 +77,15 @@ BUILD_ASSERT(MPSL_RTC_IRQn != DT_IRQN(DT_NODELABEL(grtc)), "MPSL requires a dedi
 
 BUILD_ASSERT(MPSL_IRQ_IN_DT, "The MPSL GRTC IRQ is not in the device tree");
 
-BUILD_ASSERT((NRFX_CONFIG_GRTC_MASK_DT(child_owned_channels) & MPSL_RESERVED_GRTC_CHANNELS) ==
-		     MPSL_RESERVED_GRTC_CHANNELS,
+BUILD_ASSERT((NRFX_CONFIG_MASK_DT(DT_NODELABEL(grtc), child_owned_channels) &
+	      MPSL_RESERVED_GRTC_CHANNELS) == MPSL_RESERVED_GRTC_CHANNELS,
 	     "The GRTC channels used by MPSL must not be used by zephyr");
+#endif
 
+#if defined(CONFIG_SOC_SERIES_NRF54HX)
+#define MPSL_RESERVED_IPCT_SOURCE_CHANNELS (1U << 0)
+#define MPSL_RESERVED_DPPI_SOURCE_CHANNELS (1U << 0)
+#define MPSL_RESERVED_DPPI_SINK_CHANNELS (1U << 0)
 /* check the GRTC source channels.
  * i.e. ensure something similar to this is present in the DT
  * &dppic132 {

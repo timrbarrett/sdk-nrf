@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+#include "nrf54l15pdk_nrf54l15_cpuapp_0_3_0_fixup.dtsi"
+
+/* For nRF54L, watchdog status is disabled by default. Needs to be enabled in DTS overlay. */
+&wdt30 {
+	status = "okay";
+};
+
+/ {
+	/* Disable leds and redefine them to align configuration with CAF LEDs requirements.
+	 * The configuration needs to match the used board revision (v0.3.0).
+	 */
+	leds {
+		status = "disabled";
+	};
+
+	gpioled0 {
+		compatible = "gpio-leds";
+		status = "okay";
+		label = "LED System State";
+
+		led0_g: led_0 {
+			gpios = <&gpio2 9 GPIO_ACTIVE_HIGH>;
+			label = "Green LED 0";
+		};
+	};
+
+	gpioled1 {
+		compatible = "gpio-leds";
+		status = "okay";
+		label = "LED Conn State";
+
+		led1_g: led_1 {
+			gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+			label = "Green LED 1";
+		};
+	};
+
+	gpioled2 {
+		compatible = "gpio-leds";
+		status = "okay";
+		label = "LED Num Lock";
+
+		led2_g: led_2 {
+			gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;
+			label = "Green LED 2";
+		};
+	};
+
+	gpioled3 {
+		compatible = "gpio-leds";
+		status = "okay";
+		label = "LED Caps Lock";
+
+		led3_g: led_3 {
+			gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+			label = "Green LED 3";
+		};
+	};
+};

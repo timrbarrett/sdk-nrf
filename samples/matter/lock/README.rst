@@ -44,7 +44,7 @@ IPv6 network support
 The development kits for this sample offer the following IPv6 network support for Matter:
 
 * Matter over Thread is supported for ``nrf52840dk_nrf52840``, ``nrf5340dk_nrf5340_cpuapp``, and ``nrf21540dk_nrf52840``.
-* Matter over Wi-Fi is supported for ``nrf5340dk_nrf5340_cpuapp`` with the ``nrf7002ek`` shield attached or for ``nrf7002dk_nrf5340_cpuapp``.
+* Matter over Wi-Fi is supported for ``nrf5340dk_nrf5340_cpuapp`` with the ``nrf7002ek`` shield attached (2.4 GHz and 5 GHz), for ``nrf7002dk_nrf5340_cpuapp`` (2.4 GHz and 5 GHz), or for ``nrf7002dk_nrf7001_nrf5340_cpuapp`` (2.4 GHz only).
 * :ref:`Switching between Matter over Thread and Matter over Wi-Fi <matter_lock_sample_wifi_thread_switching>` is supported for ``nrf5340dk_nrf5340_cpuapp`` with the ``nrf7002ek`` shield attached, using the ``thread_wifi_switched`` build type.
 
 Overview
@@ -159,7 +159,7 @@ The sample does not use a single :file:`prj.conf` file.
 Configuration files are provided for different build types, and they are located in the sample root directory.
 Before you start testing the application, you can select one of the build types supported by the application.
 
-See :ref:`app_build_additions_build_types` and :ref:`modifying_build_types` for more information about this feature of the |NCS|.
+See :ref:`app_build_additions_build_types` and :ref:`cmake_options` for more information.
 
 The sample supports the following build types:
 
@@ -183,10 +183,6 @@ The sample supports the following build types:
      - :file:`prj_thread_wifi_switched.conf`
      - nRF5340 DK with the nRF7002 EK shield attached
      - Debug version of the application with the ability to :ref:`switch between Thread and Wi-Fi network support <matter_lock_sample_wifi_thread_switching>` in the field.
-   * - No DFU
-     - :file:`prj_no_dfu.conf`
-     - nRF52840 DK, nRF5340 DK, nRF7002 DK, and nRF21540 DK
-     - Debug version of the application without Device Firmware Upgrade feature support.
 
 .. matter_door_lock_sample_configuration_file_types_end
 
@@ -214,7 +210,6 @@ The DFU over Matter is enabled by default.
 The following configuration arguments are available during the build process for configuring DFU:
 
 * To configure the sample to support the DFU over Matter and SMP, use the ``-DCONFIG_CHIP_DFU_OVER_BT_SMP=y`` build flag.
-* To configure the sample to disable the DFU and the secure bootloader, use the ``-DCONF_FILE=prj_no_dfu.conf`` build flag.
 
 See :ref:`cmake_options` for instructions on how to add these options to your build.
 
@@ -269,7 +264,7 @@ Factory data support
 
 .. matter_door_lock_sample_factory_data_start
 
-In this sample, the factory data support is enabled by default for all build types except for the ``no_dfu`` build type.
+In this sample, the factory data support is enabled by default for all build types except for the target board nRF21540 DK.
 This means that a new factory data set will be automatically generated when building for the target board.
 
 To disable factory data support, set the following Kconfig options to ``n``:
@@ -312,13 +307,19 @@ LED 2:
 Button 1:
     Depending on how long you press the button:
 
-    * If the device is not provisioned to the Matter network, it initiates the SMP server (Simple Management Protocol) and Bluetooth LE advertising for Matter commissioning.
-      After that, the Direct Firmware Update (DFU) over Bluetooth Low Energy can be started.
-      (See `Upgrading the device firmware`_.)
-      Bluetooth LE advertising makes the device discoverable over Bluetooth LE for the predefined period of time (15 minutes by default).
-    * If the device is already provisioned to the Matter network it re-enables the SMP server.
-      After that, the DFU over Bluetooth Low Energy can be started.
-      (See `Upgrading the device firmware`_.)
+    * If pressed for less than three seconds:
+
+      * If the device is not provisioned to the Matter network, it initiates the SMP server (Simple Management Protocol) and Bluetooth LE advertising for Matter commissioning.
+        After that, the Device Firmware Update (DFU) over Bluetooth Low Energy can be started.
+        (See `Upgrading the device firmware`_.)
+        Bluetooth LE advertising makes the device discoverable over Bluetooth LE for the predefined period of time (15 minutes by default).
+
+      * If the device is already provisioned to the Matter network it re-enables the SMP server.
+        After that, the DFU over Bluetooth Low Energy can be started.
+        (See `Upgrading the device firmware`_.)
+
+    * If pressed for more than three seconds, it initiates the factory reset of the device.
+      Releasing the button within a 3-second window of the initiation cancels the factory reset procedure.
 
 .. matter_door_lock_sample_button1_end
 
@@ -352,7 +353,7 @@ Selecting a build type
 ======================
 
 Before you start testing the application, you can select one of the :ref:`matter_lock_sample_configuration_build_types`.
-See :ref:`modifying_build_types` for detailed steps how to select a build type.
+See :ref:`cmake_options` for information about how to select a build type.
 
 Testing
 =======
@@ -381,7 +382,7 @@ After building the sample and programming it to your development kit, complete t
       I: Lock Action has been initiated
       I: Lock Action has been completed
 
-#. Press **Button 1** to initiate factory reset of the device.
+#. Keep the **Button 1** pressed for more than six seconds to initiate factory reset of the device.
 
 The device reboots after all its settings are erased.
 

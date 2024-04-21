@@ -39,6 +39,8 @@ manifest:
       url-base: https://github.com/BabbleSim
     - name: bosch
       url-base: https://github.com/boschsensortec
+    - name: eembc
+      url-base: https://github.com/eembc
 
   # If not otherwise specified, the projects below should be obtained
   # from the ncs remote.
@@ -61,7 +63,7 @@ manifest:
     # https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/zephyr/guides/modules.html
     - name: zephyr
       repo-path: sdk-zephyr
-      revision: v3.5.99-ncs1
+      revision: c22c9c258ce776b88dac8a917ab13f46a4c7db85
       import:
         # In addition to the zephyr repository itself, NCS also
         # imports the contents of zephyr/west.yml at the above
@@ -112,7 +114,7 @@ manifest:
     - name: hostap
       repo-path: sdk-hostap
       path: modules/lib/hostap
-      revision: dda5457ad2cfce99e333980c7764c8d480ae4010
+      revision: 2cc138102a0332caf8fd241869d330e39fb5008c
       userdata:
         ncs:
           upstream-url: https://w1.fi/cgit/hostap/
@@ -129,7 +131,7 @@ manifest:
           compare-by-default: true
     - name: mcuboot
       repo-path: sdk-mcuboot
-      revision: v2.0.99-ncs1
+      revision: 86af2de75205ec5f2c846a2393934360de22fde4
       path: bootloader/mcuboot
     - name: qcbor
       url: https://github.com/laurencelundblade/QCBOR
@@ -138,15 +140,19 @@ manifest:
     - name: mbedtls
       path: modules/crypto/mbedtls
       repo-path: sdk-mbedtls
-      revision: v3.5.2-ncs1
+      revision: c99e53f8bacdce37db400e5c46b26ee26937234c
+    - name: oberon-psa-crypto
+      path: modules/crypto/oberon-psa-crypto
+      repo-path: sdk-oberon-psa-crypto
+      revision: 7f14cea2b557b857d316d1ea6660fbb3bd6cce8c
     - name: nrfxlib
       repo-path: sdk-nrfxlib
       path: nrfxlib
-      revision: v2.6.0
+      revision: c8ac54953a723593a3a00af627ea1279912aa778
     - name: trusted-firmware-m
       repo-path: sdk-trusted-firmware-m
       path: modules/tee/tf-m/trusted-firmware-m
-      revision: v2.0.0-ncs1
+      revision: 914545280fd8d8f65141398734685b924de10ad2
     - name: psa-arch-tests
       repo-path: sdk-psa-arch-tests
       path: modules/tee/tf-m/psa-arch-tests
@@ -154,7 +160,8 @@ manifest:
     - name: matter
       repo-path: sdk-connectedhomeip
       path: modules/lib/matter
-      revision: v2.6.0
+      revision: d769c56c6ad764bfe1c2b5f2111a640775301060
+      west-commands: scripts/west/west-commands.yml
       submodules:
         - name: nlio
           path: third_party/nlio/repo
@@ -169,19 +176,19 @@ manifest:
       userdata:
         ncs:
           upstream-url: https://github.com/project-chip/connectedhomeip
-          upstream-sha: 8f66f4215bc0708efc8cc73bda80620e67d8955f
+          upstream-sha: 181b0cb14ff007ec912f2ba6627e05dfb066c008
           compare-by-default: false
     - name: nrf-802154
       repo-path: sdk-nrf-802154
       path: nrf-802154
-      revision: v2.6.0
+      revision: b23a4e2711ec9b00b53cdaba5869cb4587a5d420
       groups:
         - nrf-802154
     - name: dragoon
       # Only for internal Nordic development
       repo-path: dragoon.git
       remote: dragoon
-      revision: 36f0e50e876848fb02fd9f82cc32e57b91b15ced
+      revision: 11bdc9a50cf9b58c1c75fad164c3caadbdfbae72
       submodules: true
       groups:
         - dragoon
@@ -196,12 +203,12 @@ manifest:
           compare-by-default: false
     - name: sidewalk
       repo-path: sdk-sidewalk
-      revision: v2.6.0
+      revision: 3ea0a33dd64703068b49783b3bd1d5620f70e57e
       groups:
         - sidewalk
     - name: find-my
       repo-path: sdk-find-my
-      revision: v2.6.0
+      revision: 104486c3aa726661709293051b71560995d9f6a7
       groups:
         - find-my
     - name: azure-sdk-for-c
@@ -225,12 +232,18 @@ manifest:
     - name: openthread
       repo-path: sdk-openthread
       path: modules/lib/openthread
-      revision: b9dcdbca4edd348e924d7579a2bada48bf085645
+      revision: be7d36e4ff9cf7df6dfce54e58a31163c87b93f7
       userdata:
         ncs:
           upstream-url: https://github.com/openthread/openthread
           upstream-sha: c6eaeda5a1c1c5dbb24dce7e027340cb8893a77b
           compare-by-default: false
+    - name: suit-generator
+      revision: 60afbb26d3a00e5b2243f1304ba2bc4a6722960d
+      path: modules/lib/suit-generator
+    - name: suit-processor
+      revision: 869d22a795c4219f8e5019d44e1fbfdeadc251ab
+      path: modules/lib/suit-processor
 
     # Other third-party repositories.
     - name: cmock
@@ -244,7 +257,7 @@ manifest:
       remote: memfault
     - name: ant
       repo-path: sdk-ant
-      revision: fcfcd1bc801b0ad2ef08117c7a681514729a5c4b
+      revision: 39a2222ad786ee2f069dde41b16c8bbe775d9484
       remote: ant-nrfconnect
       groups:
         - ant
@@ -268,6 +281,12 @@ manifest:
       revision: v1.5.2400
       groups:
         - bsec
+    - name: coremark
+      remote: eembc
+      path: modules/benchmark/coremark
+      revision: d5fad6bd094899101a4e5fd53af7298160ced6ab
+      groups:
+        - benchmark
 
 
   # West-related configuration for the nrf repository.

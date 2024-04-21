@@ -54,8 +54,6 @@ The configuration files are in the |sample path| directory.
 The following files are available:
 
 * :file:`nrf7002ek-wifi-scan-only.conf` - Config overlay for nRF7002 EK Wi-Fi chip support.
-* :file:`esp_8266_nrf9160ns.overlay` - DTC overlay for ESP8266 Wi-Fi chip support.
-* :file:`overlay-esp-wifi.conf` - Config overlay for ESP8266 Wi-Fi chip support.
 * :file:`overlay-pgps.conf` - Config overlay for P-GPS support.
 
 .. include:: /libraries/modem/nrf_modem_lib/nrf_modem_lib_trace.rst
@@ -72,27 +70,15 @@ Building and running
 nRF91 Series DK with nRF7002 EK Wi-Fi support
 =============================================
 
-To build the sample with nRF91 Series DK and nRF7002 EK Wi-Fi support, use the ``-DSHIELD=nrf7002ek`` and  ``-DOVERLAY_CONFIG=overlay-nrf7002ek-wifi-scan-only.conf`` options.
+To build the sample with nRF91 Series DK and nRF7002 EK Wi-Fi support, use the ``-DSHIELD=nrf7002ek`` and  ``-DEXTRA_CONF_FILE=overlay-nrf7002ek-wifi-scan-only.conf`` options.
 For example:
 
 .. parsed-literal::
    :class: highlight
 
-   west build -p -b *build_target* -- -DSHIELD=nrf7002ek -DOVERLAY_CONFIG=overlay-nrf7002ek-wifi-scan-only.conf
+   west build -p -b *build_target* -- -DSHIELD=nrf7002ek -DEXTRA_CONF_FILE=overlay-nrf7002ek-wifi-scan-only.conf
 
 |build_target|
-
-See :ref:`cmake_options` for more instructions on how to add these options.
-
-ESP8266 Wi-Fi support
-=====================
-
-To build the Location sample with ESP8266 Wi-Fi chip support, use the ``-DDTC_OVERLAY_FILE=esp_8266_nrf9160ns.overlay`` and  ``-DOVERLAY_CONFIG=overlay-esp-wifi.conf`` options.
-For example:
-
-.. code-block:: console
-
-   west build -p -b nrf9160dk_nrf9160_ns -- -DDTC_OVERLAY_FILE=esp_8266_nrf9160ns.overlay -DOVERLAY_CONFIG=overlay-esp-wifi.conf
 
 See :ref:`cmake_options` for more instructions on how to add these options.
 
@@ -104,7 +90,7 @@ To build the Location sample with P-GPS support, use the following commands:
 .. parsed-literal::
    :class: highlight
 
-   west build -p -b *build_target* -- -DOVERLAY_CONFIG=overlay-pgps.conf
+   west build -p -b *build_target* -- -DEXTRA_CONF_FILE=overlay-pgps.conf
 
 |build_target|
 

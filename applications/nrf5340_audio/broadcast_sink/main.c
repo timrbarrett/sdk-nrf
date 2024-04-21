@@ -17,7 +17,7 @@
 #include "macros_common.h"
 #include "audio_system.h"
 #include "bt_mgmt.h"
-#include "bt_rend.h"
+#include "bt_rendering_and_capture.h"
 #include "audio_datapath.h"
 #include "le_audio_rx.h"
 
@@ -105,7 +105,7 @@ static void button_msg_sub_thread(void)
 			break;
 
 		case BUTTON_VOLUME_UP:
-			ret = bt_rend_volume_up();
+			ret = bt_r_and_c_volume_up();
 			if (ret) {
 				LOG_WRN("Failed to increase volume: %d", ret);
 			}
@@ -113,7 +113,7 @@ static void button_msg_sub_thread(void)
 			break;
 
 		case BUTTON_VOLUME_DOWN:
-			ret = bt_rend_volume_down();
+			ret = bt_r_and_c_volume_down();
 			if (ret) {
 				LOG_WRN("Failed to decrease volume: %d", ret);
 			}
@@ -130,7 +130,7 @@ static void button_msg_sub_thread(void)
 
 		case BUTTON_5:
 			if (IS_ENABLED(CONFIG_AUDIO_MUTE)) {
-				ret = bt_rend_volume_mute(false);
+				ret = bt_r_and_c_volume_mute(false);
 				if (ret) {
 					LOG_WRN("Failed to mute, ret: %d", ret);
 				}
@@ -351,7 +351,7 @@ static void bt_mgmt_evt_handler(const struct zbus_channel *chan)
 
 	switch (msg->event) {
 	case BT_MGMT_PA_SYNCED:
-		LOG_INF("PA synced");
+		LOG_DBG("PA synced");
 
 		ret = broadcast_sink_pa_sync_set(msg->pa_sync, msg->broadcast_id);
 		if (ret) {

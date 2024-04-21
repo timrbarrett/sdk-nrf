@@ -35,7 +35,7 @@ IPv6 network support
 
 The development kits for this sample offer the following IPv6 network support for Matter:
 
-* Matter over Thread is supported for ``nrf52840dk_nrf52840`` and ``nrf5340dk_nrf5340_cpuapp``.
+* Matter over Thread is supported for ``nrf52840dk_nrf52840``, ``nrf5340dk_nrf5340_cpuapp``, and ``nrf54l15pdk_nrf54l15``.
 * Matter over Wi-Fi is supported for ``nrf5340dk_nrf5340_cpuapp`` with the ``nrf7002_ek`` shield attached or for ``nrf7002dk_nrf5340_cpuapp``.
 
 Overview
@@ -110,7 +110,7 @@ The sample does not use a single :file:`prj.conf` file.
 Configuration files are provided for different build types, and they are located in the sample root directory.
 Before you start testing the application, you can select one of the build types supported by the application.
 
-See :ref:`app_build_additions_build_types` and :ref:`modifying_build_types` for more information about this feature of the |NCS|.
+See :ref:`app_build_additions_build_types` and :ref:`cmake_options` for more information.
 
 The sample supports the following build types:
 
@@ -130,10 +130,6 @@ The sample supports the following build types:
      - :file:`prj_release.conf`
      - All from `Requirements`_
      - Release version of the application; can be used to enable only the necessary application functionalities to optimize its performance.
-   * - No DFU
-     - :file:`prj_no_dfu.conf`
-     - nRF52840 DK, nRF5340 DK, and nRF7002 DK
-     - Debug version of the application without Device Firmware Upgrade feature support.
 
 Device Firmware Upgrade support
 ===============================
@@ -190,7 +186,7 @@ Selecting a build type
 ======================
 
 Before you start testing the application, you can select one of the `Matter thermostat build types`_, depending on your building method.
-See :ref:`modifying_build_types` for detailed steps how to select a build type.
+See :ref:`cmake_options` for information about how to select a build type.
 
 .. _matter_thermostat_testing:
 
@@ -213,7 +209,7 @@ After building the sample and programming it to your development kit, complete t
 #. Observe the UART terminal.
    The sample starts automatically printing the simulated temperature data to the terminal with 30-second intervals.
 #. Press **Button 2** to print the most recent temperature data to the terminal.
-#. Press **Button 1** for six seconds to initiate the factory reset of the device.
+#. Keep the **Button 1** pressed for more than six seconds to initiate factory reset of the device.
 
 The device reboots after all its settings are erased.
 

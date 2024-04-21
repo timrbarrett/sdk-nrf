@@ -17,7 +17,7 @@
 #include "button_handler.h"
 #include "bt_le_audio_tx.h"
 #include "bt_mgmt.h"
-#include "bt_rend.h"
+#include "bt_rendering_and_capture.h"
 #include "audio_datapath.h"
 #include "bt_content_ctrl.h"
 #include "unicast_server.h"
@@ -82,19 +82,18 @@ static void button_msg_sub_thread(void)
 
 		switch (msg.button_pin) {
 		case BUTTON_PLAY_PAUSE:
-			if (IS_ENABLED(CONFIG_STREAM_BIDIRECTIONAL)) {
-				LOG_WRN("Play/pause not supported in walkie-talkie and "
-					"bidirectional mode");
+			if (IS_ENABLED(CONFIG_WALKIE_TALKIE_DEMO)) {
+				LOG_WRN("Play/pause not supported in walkie-talkie mode");
 				break;
 			}
 
-			if (strm_state == STATE_STREAMING) {
+			if (bt_content_ctlr_media_state_playing()) {
 				ret = bt_content_ctrl_stop(NULL);
 				if (ret) {
 					LOG_WRN("Could not stop: %d", ret);
 				}
 
-			} else if (strm_state == STATE_PAUSED) {
+			} else if (!bt_content_ctlr_media_state_playing()) {
 				ret = bt_content_ctrl_start(NULL);
 				if (ret) {
 					LOG_WRN("Could not start: %d", ret);
@@ -107,7 +106,7 @@ static void button_msg_sub_thread(void)
 			break;
 
 		case BUTTON_VOLUME_UP:
-			ret = bt_rend_volume_up();
+			ret = bt_r_and_c_volume_up();
 			if (ret) {
 				LOG_WRN("Failed to increase volume: %d", ret);
 			}
@@ -115,7 +114,7 @@ static void button_msg_sub_thread(void)
 			break;
 
 		case BUTTON_VOLUME_DOWN:
-			ret = bt_rend_volume_down();
+			ret = bt_r_and_c_volume_down();
 			if (ret) {
 				LOG_WRN("Failed to decrease volume: %d", ret);
 			}
@@ -146,7 +145,7 @@ static void button_msg_sub_thread(void)
 
 		case BUTTON_5:
 			if (IS_ENABLED(CONFIG_AUDIO_MUTE)) {
-				ret = bt_rend_volume_mute(false);
+				ret = bt_r_and_c_volume_mute(false);
 				if (ret) {
 					LOG_WRN("Failed to mute, ret: %d", ret);
 				}
@@ -353,7 +352,7 @@ static void bt_mgmt_evt_handler(const struct zbus_channel *chan)
 	case BT_MGMT_SECURITY_CHANGED:
 		LOG_INF("Security changed");
 
-		ret = bt_rend_discover(msg->conn);
+		ret = bt_r_and_c_discover(msg->conn);
 		if (ret) {
 			LOG_WRN("Failed to discover rendering services");
 		}
@@ -429,7 +428,7 @@ static int ext_adv_populate(struct bt_data *ext_adv_buf, size_t ext_adv_buf_size
 	ext_adv_buf[ext_adv_buf_cnt].data = uuid_buf.data;
 	ext_adv_buf_cnt++;
 
-	ret = bt_rend_uuid_populate(&uuid_buf);
+	ret = bt_r_and_c_uuid_populate(&uuid_buf);
 
 	if (ret) {
 		LOG_ERR("Failed to add adv data from renderer: %d", ret);
@@ -440,6 +439,12 @@ static int ext_adv_populate(struct bt_data *ext_adv_buf, size_t ext_adv_buf_size
 
 	if (ret) {
 		LOG_ERR("Failed to add adv data from content ctrl: %d", ret);
+		return ret;
+	}
+
+	ret = bt_mgmt_manufacturer_uuid_populate(&uuid_buf, CONFIG_BT_DEVICE_MANUFACTURER_ID);
+	if (ret) {
+		LOG_ERR("Failed to add adv data with manufacturer ID: %d", ret);
 		return ret;
 	}
 
@@ -518,7 +523,7 @@ int main(void)
 	ret = unicast_server_enable(le_audio_rx_data_handler);
 	ERR_CHK_MSG(ret, "Failed to enable LE Audio");
 
-	ret = bt_rend_init();
+	ret = bt_r_and_c_init();
 	ERR_CHK(ret);
 
 	ret = bt_content_ctrl_init();

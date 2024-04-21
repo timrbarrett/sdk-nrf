@@ -103,8 +103,11 @@ Glossary
 
    Build type
       A build type is a feature that defines the way in which the configuration files are to be handled.
-      The |NCS| provides support for :ref:`app_build_additions_build_types`.
-      Selecting a specific build type can result in a different structure of the :term:`build configuration`.
+      The |NCS| provides support for handling :ref:`app_build_additions_build_types`
+      :ref:`Selecting a specific build type <cmake_options>` can result in a different structure of the :term:`build configuration`.
+
+      .. note::
+           Build types are deprecated and are being gradually replaced by Zephyr's :ref:`file suffixes <modifying_build_types>` and :ref:`zephyr:sysbuild`.
 
    Carrier-sense Multiple Access with Collision Avoidance (CSMA/CA)
       A network multiple access method in which carrier sensing is used, but nodes attempt to avoid collisions by beginning transmission only after the channel is sensed to be idle.
@@ -879,6 +882,7 @@ Glossary
    UART Hardware Flow Control (UART HWFC)
       A handshaking mechanism used to prevent a buffer overflow in the receiver (in embedded computing use cases).
       In a serial connection, when the transmission baud rate is high enough for data to appear faster than it can be processed by the receiver, the communicating devices can synchronize with each other, using :term:`Request to Send (RTS)` and :term:`Clear to Send (CTS)` pins.
+      In the |NCS|, UART HWFC is usually not used when :ref:`testing applications <test_and_optimize>`.
 
    Unicast addressing
       An addressing type that uses a one-to-one association between the destination address and the network endpoint.
@@ -921,7 +925,7 @@ Glossary
          * M: Multiply and divide extension
          * C: Compressed extension (compressed instructions)
 
-      The nRF54H20 PDK uses several VPR cores: :term:`Fast Lightweight Processor (FLPR, pronounced “Flipper”)`, :term:`Peripheral Processor (PPR, pronounced “Pepper”)` and :term:`System Controller`.
+      The nRF54H20 DK uses several VPR cores: :term:`Fast Lightweight Processor (FLPR, pronounced “Flipper”)`, :term:`Peripheral Processor (PPR, pronounced “Pepper”)` and :term:`System Controller`.
 
    VPR Event Interface (VEVIF)
       A real-time peripheral that allows interaction with the VPR's interrupts and the PPI system in the domain where the VPR is instantiated.
@@ -935,15 +939,15 @@ Glossary
       See :ref:`zephyr:west`.
 
    West manifest file
-      The main file describing the contents of a :term:`West` workspace, which is located in the :term:`West manifest repository`.
+      The main file describing the contents of a :term:`west <West>` workspace, which is located in the :term:`west manifest repository <West manifest repository>`.
       In the |NCS| and Zephyr, it is named :file:`west.yml`.
 
    West manifest repository
-      A :term:`repository <Repository>` that contains a :term:`West manifest file` and can be used to configure a west workspace.
+      A :term:`repository <Repository>` that contains a :term:`west manifest file <West manifest file>` and can be used to configure a west workspace.
       See :ref:`dm_repo_types`.
 
    West project
-      Any of the listed :term:`repositories <Repository>` inside a :term:`West manifest file`.
+      Any of the listed :term:`repositories <Repository>` inside a :term:`west manifest file <West manifest file>`.
 
    Wi-Fi Protected Access® (WPA)
       A security protocol developed by Wi-Fi Alliance.

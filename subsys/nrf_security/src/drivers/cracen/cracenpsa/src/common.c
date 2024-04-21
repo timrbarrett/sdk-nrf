@@ -5,6 +5,7 @@
  */
 
 #include "common.h"
+#include <cracen/lib_kmu.h>
 #include <cracen/mem_helpers.h>
 #include <cracen/statuscodes.h>
 #include <mbedtls/asn1.h>
@@ -21,6 +22,7 @@
 #include <sxsymcrypt/sha2.h>
 #include <sxsymcrypt/sha3.h>
 #include <zephyr/sys/util.h>
+#include <hal/nrf_cracen.h>
 
 #define NOT_ENABLED_CURVE    (0)
 #define NOT_ENABLED_HASH_ALG (0)
@@ -128,27 +130,27 @@ static psa_status_t get_sx_brainpool_curve(size_t curve_bits, const struct sx_pk
 
 	switch (curve_bits) {
 	case 192:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_BRAINPOOL_P_R1,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_BRAINPOOL_P_R1_192,
 			   (selected_curve = &sx_curve_brainpoolP192r1));
 		break;
 	case 224:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_BRAINPOOL_P_R1,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_BRAINPOOL_P_R1_224,
 			   (selected_curve = &sx_curve_brainpoolP224r1));
 		break;
 	case 256:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_BRAINPOOL_P_R1_256,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_BRAINPOOL_P_R1_256,
 			   (selected_curve = &sx_curve_brainpoolP256r1));
 		break;
 	case 320:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_BRAINPOOL_P_R1,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_BRAINPOOL_P_R1_320,
 			   (selected_curve = &sx_curve_brainpoolP320r1));
 		break;
 	case 384:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_BRAINPOOL_P_R1_384,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_BRAINPOOL_P_R1_384,
 			   (selected_curve = &sx_curve_brainpoolP384r1));
 		break;
 	case 512:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_BRAINPOOL_P_R1_512,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_BRAINPOOL_P_R1_512,
 			   (selected_curve = &sx_curve_brainpoolP512r1));
 		break;
 	default:
@@ -169,23 +171,23 @@ static psa_status_t get_sx_secp_r1_curve(size_t curve_bits, const struct sx_pk_e
 
 	switch (curve_bits) {
 	case 192:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_SECP_R1_192,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_SECP_R1_192,
 			   (selected_curve = &sx_curve_nistp192));
 		break;
 	case 224:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_SECP_R1_224,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_SECP_R1_224,
 			   (selected_curve = &sx_curve_nistp224));
 		break;
 	case 256:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_SECP_R1_256,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_SECP_R1_256,
 			   (selected_curve = &sx_curve_nistp256));
 		break;
 	case 384:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_SECP_R1_384,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_SECP_R1_384,
 			   (selected_curve = &sx_curve_nistp384));
 		break;
 	case 521:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_SECP_R1_521,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_SECP_R1_521,
 			   (selected_curve = &sx_curve_nistp521));
 		break;
 	default:
@@ -206,13 +208,13 @@ static psa_status_t get_sx_secp_k1_curve(size_t curve_bits, const struct sx_pk_e
 
 	switch (curve_bits) {
 	case 192:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_SECP_K1_192,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_SECP_K1_192,
 			   (selected_curve = &sx_curve_secp192k1));
 		break;
 	case 225:
 		return PSA_ERROR_NOT_SUPPORTED;
 	case 256:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_SECP_K1_256,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_SECP_K1_256,
 			   (selected_curve = &sx_curve_secp256k1));
 		break;
 	}
@@ -231,11 +233,11 @@ static psa_status_t get_sx_montgomery_curve(size_t curve_bits, const struct sx_p
 
 	switch (curve_bits) {
 	case 255:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_MONTGOMERY_255,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_MONTGOMERY_255,
 			   (selected_curve = &sx_curve_x25519));
 		break;
 	case 448:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_MONTGOMERY_448,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_MONTGOMERY_448,
 			   (selected_curve = &sx_curve_x448));
 		break;
 	default:
@@ -256,11 +258,11 @@ static psa_status_t get_sx_edwards_curve(size_t curve_bits, const struct sx_pk_e
 
 	switch (curve_bits) {
 	case 255:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_TWISTED_EDWARDS_448,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_TWISTED_EDWARDS_255,
 			   (selected_curve = &sx_curve_ed25519));
 		break;
 	case 448:
-		IF_ENABLED(PSA_NEED_CRACEN_KEY_MANAGEMENT_TWISTED_EDWARDS_448,
+		IF_ENABLED(PSA_NEED_CRACEN_KEY_TYPE_ECC_TWISTED_EDWARDS_448,
 			   (selected_curve = &sx_curve_ed448));
 		break;
 	default:
@@ -413,11 +415,15 @@ int cracen_signature_asn1_get_operand(unsigned char **p, const unsigned char *en
 				      struct sx_buf *op)
 {
 	int ret;
-	size_t len;
+	size_t len = 0;
 	size_t i = 0;
 
 	ret = mbedtls_asn1_get_tag(p, end, &len, MBEDTLS_ASN1_INTEGER);
 	if (ret) {
+		return SX_ERR_INVALID_PARAM;
+	}
+
+	if (*p + len > end) {
 		return SX_ERR_INVALID_PARAM;
 	}
 
@@ -556,15 +562,19 @@ int cracen_signature_get_rsa_key(struct si_rsa_key *rsa, bool extract_pubkey, bo
 
 static int cracen_prepare_ik_key(const uint8_t *user_data)
 {
+#ifdef CONFIG_CRACEN_LOAD_KMU_SEED
+	if (!nrf_cracen_seedram_lock_check(NRF_CRACEN)) {
+		if (lib_kmu_push_slot(0) || lib_kmu_push_slot(1) || lib_kmu_push_slot(2)) {
+			return SX_ERR_INVALID_KEYREF;
+		}
+		nrf_cracen_seedram_lock_enable_set(NRF_CRACEN, true);
+	}
+#endif
 	return sx_pk_ik_derive_keys(NULL);
 }
 
 static int cracen_clean_ik_key(const uint8_t *user_data)
 {
-	/* We should call sx_pk_ik_mode_exit(NULL) here, but it hangs.
-	 * Currently Cracen is powered off after each operation, so in
-	 * any case Cracen is not in IK-mode for the next operation.
-	 */
 	return SX_OK;
 }
 

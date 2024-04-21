@@ -15,11 +15,12 @@ enum kmu_metadata_key_bits {
 	METADATA_ALG_KEY_BITS_128 = 1,
 	METADATA_ALG_KEY_BITS_192 = 2,
 	METADATA_ALG_KEY_BITS_256 = 3,
+	METADATA_ALG_KEY_BITS_384_SEED = 4,
 };
 
 typedef struct {
 	uint8_t key_usage_scheme: 2; /* value of @ref kmu_metadata_key_usage_scheme. */
-	uint8_t number_of_slots: 2;  /* Number of slots to push. */
+	uint8_t number_of_slots: 3;  /* Number of slots to push. */
 	uint8_t slot_id;	     /* KMU slot number. */
 } kmu_opaque_key_buffer;
 
@@ -62,18 +63,6 @@ int cracen_kmu_prepare_key(const uint8_t *user_data);
  * @return Silex status code.
  */
 int cracen_kmu_clean_key(const uint8_t *user_data);
-
-/**
- * @brief Retrieves the slot number for a given key handle.
- *
- * @param[in]  key_id      Key handler.
- * @param[out] lifetime    Lifetime for key.
- * @param[out] slot_number The key's slot number.
- *
- * @return psa_status_t
- */
-psa_status_t cracen_kmu_get_key_slot(mbedtls_svc_key_id_t key_id, psa_key_lifetime_t *lifetime,
-				     psa_drv_slot_number_t *slot_number);
 
 /**
  * @brief Retrieves attributes and opaque key buffer for key.

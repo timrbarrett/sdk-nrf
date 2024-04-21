@@ -318,13 +318,16 @@ The following configuration files are provided:
   This disables most of the IP-based protocols available through AT commands (such as FTP and MQTT) as it is expected that the controlling chip's own IP stack is used instead.
   See :ref:`CONFIG_SLM_PPP <CONFIG_SLM_PPP>` and :ref:`SLM_AT_PPP` for more information.
 
-* :file:`overlay-ppp-without-cmux.overlay` - Devicetree overlay file that configures the UART to be used by PPP.
+* :file:`overlay-ppp-without-cmux.conf` - Kconfig fragment that configures the UART to be used by PPP.
+  This configuration file should be included when building SLM with PPP and without CMUX.
+
+* :file:`overlay-ppp-without-cmux.overlay` - Devicetree overlay that configures the UART to be used by PPP.
   This configuration file should be included when building SLM with PPP and without CMUX, in addition to :file:`overlay-ppp.conf`.
   It can be customized to fit your configuration (UART, baud rate, and so on).
   By default, it sets the baud rate of the PPP UART to 1 000 000.
 
 * :file:`overlay-zephyr-modem.conf`, :file:`overlay-zephyr-modem-external-mcu.conf`, :file:`overlay-zephyr-modem-nrf9160dk-nrf52840.conf`, :file:`overlay-external-mcu.overlay`,  and :file:`overlay-zephyr-modem-nrf9160dk-nrf52840.overlay` - These configuration files are used when compiling SLM to turn an nRF91 Series SiP into a Zephyr-compatible standalone modem.
-   See :ref:`slm_as_zephyr_modem` for more information.
+  See :ref:`slm_as_zephyr_modem` for more information.
 
 * :file:`boards/nrf9160dk_nrf9160_ns.conf` - Configuration file specific for the nRF9160 DK.
   This file is automatically merged with the :file:`prj.conf` file when you build for the ``nrf9160dk_nrf9160_ns`` build target.
@@ -399,23 +402,14 @@ To connect to an nRF91 Series DK with a PC:
    Using the Cellular Monitor app in combination with the nRF Connect Serial Terminal shows how the modem responds to the different modem commands.
    You can then use this connection to send or receive AT commands over UART, and to see the log output of the development kit.
 
-   Alternatively, you can use a terminal emulator like `Termite`_, `Teraterm`_, or PuTTY to establish a terminal connection to the development kit, using the :ref:`default serial port connection settings <test_and_optimize>`.
+   Instead of using nRF Connect Serial Terminal, you can use PuTTY to establish a terminal connection to the development kit, using the :ref:`default serial port connection settings <test_and_optimize>`.
 
    .. note::
 
       The default AT command terminator is a carriage return followed by a line feed (``\r\n``).
       nRF Connect Serial Terminal supports this format.
       If you want to use another terminal emulator, make sure that the configured AT command terminator corresponds to the line terminator of your terminal.
-
-      When using `Termite`_ and `Teraterm`_, configure the AT command terminator as follows:
-
-      .. figure:: images/termite.svg
-         :alt: Termite configuration for sending AT commands through UART
-
-      .. figure:: images/teraterm.svg
-         :alt: Teraterm configuration for sending AT commands through UART
-
-      When using PuTTY, you must set the :ref:`CONFIG_SLM_CR_TERMINATION <CONFIG_SLM_CR_TERMINATION>` SLM configuration option instead.
+      When using PuTTY, you must set the :ref:`CONFIG_SLM_CR_TERMINATION <CONFIG_SLM_CR_TERMINATION>` SLM configuration option.
       See :ref:`slm_config_options` for more details.
 
 .. slm_connecting_91dk_pc_instr_end

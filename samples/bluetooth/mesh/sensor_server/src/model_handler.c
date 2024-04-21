@@ -126,11 +126,14 @@ static int chip_temp_get(struct bt_mesh_sensor_srv *srv,
 	err = sensor_channel_get(dev, SENSOR_DATA_TYPE, &channel_val);
 	if (err) {
 		printk("Error getting temperature sensor data (%d)\n", err);
+		return err;
 	}
+
 	err = bt_mesh_sensor_value_from_sensor_value(
 		sensor->type->channels[0].format, &channel_val, rsp);
 	if (err) {
 		printk("Error encoding temperature sensor data (%d)\n", err);
+		return err;
 	}
 
 	if (!BT_MESH_SENSOR_VALUE_IN_RANGE(rsp, &temp_range.start, &temp_range.end)) {
@@ -146,7 +149,8 @@ static int chip_temp_get(struct bt_mesh_sensor_srv *srv,
 
 	tot_temp_samps++;
 
-	return err;
+	printk("Chip temp: %s, total samples: %d\n", bt_mesh_sensor_ch_str(rsp), tot_temp_samps);
+	return 0;
 }
 
 /* Tolerance is based on the nRF52832's temperature sensor's accuracy and range (5/125 = 4%). */
@@ -409,7 +413,9 @@ static int presence_detected_get(struct bt_mesh_sensor_srv *srv,
 						  pres_detect * 1000000LL, rsp);
 
 	if (err) {
-		printk("Error encoding presence detected (%d)", err);
+		printk("Error encoding presence detected (%d)\n", err);
+	} else {
+		printk("Presence detected: %d\n", pres_detect);
 	}
 	return err;
 };
@@ -439,6 +445,9 @@ static int time_since_presence_detected_get(struct bt_mesh_sensor_srv *srv,
 
 		err = bt_mesh_sensor_value_from_micro(format, micro_since_detect, rsp);
 		if (err == -ERANGE) {
+			printk("Warning: Time since presence detected (%u) is out of range and was"
+			       " clamped to (%s)\n", (uint32_t)(k_uptime_get() - prev_detect),
+			       bt_mesh_sensor_ch_str(rsp));
 			/* Ignore range error and respond with clamped value */
 			return 0;
 		}
@@ -451,7 +460,10 @@ static int time_since_presence_detected_get(struct bt_mesh_sensor_srv *srv,
 	}
 
 	if (err) {
-		printk("Error encoding time since presence detected (%d)", err);
+		printk("Error encoding time since presence detected (%d)\n", err);
+	} else {
+		printk("Time since presence detected(%d): %s\n", pres_detect,
+		       bt_mesh_sensor_ch_str(rsp));
 	}
 	return err;
 }
@@ -506,7 +518,7 @@ static int amb_light_level_gain_set(struct bt_mesh_sensor_srv *srv,
 	(void)bt_mesh_sensor_value_to_float(value, &value_f);
 
 	amb_light_level_gain_store(value_f);
-	printk("Ambient light level gain: %s\n", bt_mesh_sensor_ch_str(value));
+	printk("Ambient light level gain set: %s\n", bt_mesh_sensor_ch_str(value));
 
 	return 0;
 }
@@ -535,14 +547,14 @@ static int amb_light_level_ref_set(struct bt_mesh_sensor_srv *srv,
 	/* When using the a real ambient light sensor the sensor value should be
 	 * read and used instead of the dummy value.
 	 */
-	if (dummy_ambient_light_value > 0.0) {
+	if (dummy_ambient_light_value > 0.0f) {
 		amb_light_level_gain_store(ref_float / dummy_ambient_light_value);
 	} else {
 		amb_light_level_gain_store(FLT_MAX);
 	}
 
-	printk("Ambient light level ref(%s) ", bt_mesh_sensor_ch_str(value));
-	printk("gain(%f)\n", amb_light_level_gain);
+	printk("Ambient light level ref set: %s gain(%f)\n", bt_mesh_sensor_ch_str(value),
+	       (double)amb_light_level_gain);
 
 	return 0;
 }
@@ -620,6 +632,7 @@ static int amb_light_level_get(struct bt_mesh_sensor_srv *srv,
 		return err;
 	}
 
+	printk("Ambient light level: %s\n", bt_mesh_sensor_ch_str(rsp));
 	return 0;
 }
 
@@ -677,7 +690,9 @@ static void presence_detected(struct k_work *work)
 	err = bt_mesh_sensor_srv_pub(&occupancy_sensor_srv, NULL, &presence_sensor, &val);
 
 	if (err) {
-		printk("Error publishing end of presence (%d)\n", err);
+		printk("Error publishing presence (%d)\n", err);
+	} else {
+		printk("Publishing presence\n");
 	}
 
 	pres_detect = 1;
@@ -694,45 +709,16 @@ static const double dummy_amb_light_values[] = {
 	167772.13,
 };
 
+#define BUTTON_PRESSED(p, c, b) ((p & b) && (c & b))
+#define BUTTON_RELEASED(p, c, b) (!(p & b) && (c & b))
+
 static void button_handler_cb(uint32_t pressed, uint32_t changed)
 {
 	if (!bt_mesh_is_provisioned()) {
 		return;
 	}
 
-	if (pressed & changed & BIT(0)) {
-		int64_t thres_micros;
-		enum bt_mesh_sensor_value_status status;
-
-		status = bt_mesh_sensor_value_to_micro(&pres_mot_thres, &thres_micros);
-		if (bt_mesh_sensor_value_status_is_numeric(status)) {
-			k_work_reschedule(&presence_detected_work, K_MSEC(thres_micros / 10000));
-		} else {
-			/* Value is not known, register presence immediately */
-			k_work_reschedule(&presence_detected_work, K_NO_WAIT);
-		}
-	}
-
-	if ((!pressed) & changed & BIT(0)) {
-		if (!pres_detect) {
-			k_work_cancel_delayable(&presence_detected_work);
-		} else {
-			int err;
-			struct bt_mesh_sensor_value val = BOOLEAN_INIT(false);
-
-			err = bt_mesh_sensor_srv_pub(&occupancy_sensor_srv, NULL,
-						&presence_sensor, &val);
-
-			if (err) {
-				printk("Error publishing presence (%d)\n", err);
-			}
-
-			pres_detect = 0;
-			prev_detect = k_uptime_get_32();
-		}
-	}
-
-	if (pressed & changed & BIT(1)) {
+	if (BUTTON_PRESSED(pressed, changed, BIT(0))) {
 		int err;
 		static int amb_light_idx;
 		struct bt_mesh_sensor_value val;
@@ -751,6 +737,46 @@ static void button_handler_cb(uint32_t pressed, uint32_t changed)
 					     &present_amb_light_level, &val);
 		if (err) {
 			printk("Error publishing present ambient light level (%d)\n", err);
+		} else {
+			printk("Publishing present ambient light level %s\n",
+			       bt_mesh_sensor_ch_str(&val));
+		}
+	}
+
+	if (BUTTON_PRESSED(pressed, changed, BIT(1))) {
+		int64_t thres_micros;
+		enum bt_mesh_sensor_value_status status;
+
+		status = bt_mesh_sensor_value_to_micro(&pres_mot_thres, &thres_micros);
+		if (bt_mesh_sensor_value_status_is_numeric(status)) {
+			k_work_reschedule(&presence_detected_work, K_MSEC(thres_micros / 10000));
+			printk("Presence will be published in %d ms\n",
+			       (uint16_t)(thres_micros / 10000));
+		} else {
+			/* Value is not known, register presence immediately */
+			k_work_reschedule(&presence_detected_work, K_NO_WAIT);
+		}
+	}
+
+	if (BUTTON_RELEASED(pressed, changed, BIT(1))) {
+		if (!pres_detect) {
+			printk("Publishing presence is aborted\n");
+			k_work_cancel_delayable(&presence_detected_work);
+		} else {
+			int err;
+			struct bt_mesh_sensor_value val = BOOLEAN_INIT(false);
+
+			err = bt_mesh_sensor_srv_pub(&occupancy_sensor_srv, NULL,
+						&presence_sensor, &val);
+
+			if (err) {
+				printk("Error publishing end of presence (%d)\n", err);
+			} else {
+				printk("Publishing end of presence\n");
+			}
+
+			pres_detect = 0;
+			prev_detect = k_uptime_get_32();
 		}
 	}
 }

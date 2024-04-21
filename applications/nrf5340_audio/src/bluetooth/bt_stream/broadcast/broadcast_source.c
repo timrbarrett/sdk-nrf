@@ -19,6 +19,7 @@
 
 #include "macros_common.h"
 #include "bt_le_audio_tx.h"
+#include "le_audio.h"
 #include "nrf5340_audio_common.h"
 
 #include <zephyr/logging/log.h>
@@ -33,40 +34,6 @@ BUILD_ASSERT(CONFIG_BT_BAP_BROADCAST_SRC_STREAM_COUNT <= 2,
 ZBUS_CHAN_DEFINE(le_audio_chan, struct le_audio_msg, NULL, NULL, ZBUS_OBSERVERS_EMPTY,
 		 ZBUS_MSG_INIT(0));
 
-#if CONFIG_BT_AUDIO_BROADCAST_CONFIGURABLE
-#define BT_BAP_LC3_BROADCAST_PRESET_NRF5340_AUDIO                                                  \
-	BT_BAP_LC3_PRESET_CONFIGURABLE(                                                            \
-		BT_AUDIO_LOCATION_FRONT_LEFT | BT_AUDIO_LOCATION_FRONT_RIGHT,                      \
-		BT_AUDIO_CONTEXT_TYPE_MEDIA, CONFIG_BT_AUDIO_BITRATE_BROADCAST_SRC)
-
-#elif CONFIG_BT_BAP_BROADCAST_16_2_1
-#define BT_BAP_LC3_BROADCAST_PRESET_NRF5340_AUDIO                                                  \
-	BT_BAP_LC3_BROADCAST_PRESET_16_2_1(BT_AUDIO_LOCATION_FRONT_LEFT |                          \
-						   BT_AUDIO_LOCATION_FRONT_RIGHT,                  \
-					   BT_AUDIO_CONTEXT_TYPE_MEDIA)
-
-#elif CONFIG_BT_BAP_BROADCAST_24_2_1
-#define BT_BAP_LC3_BROADCAST_PRESET_NRF5340_AUDIO                                                  \
-	BT_BAP_LC3_BROADCAST_PRESET_24_2_1(BT_AUDIO_LOCATION_FRONT_LEFT |                          \
-						   BT_AUDIO_LOCATION_FRONT_RIGHT,                  \
-					   BT_AUDIO_CONTEXT_TYPE_MEDIA)
-
-#elif CONFIG_BT_BAP_BROADCAST_16_2_2
-#define BT_BAP_LC3_BROADCAST_PRESET_NRF5340_AUDIO                                                  \
-	BT_BAP_LC3_BROADCAST_PRESET_16_2_2(BT_AUDIO_LOCATION_FRONT_LEFT |                          \
-						   BT_AUDIO_LOCATION_FRONT_RIGHT,                  \
-					   BT_AUDIO_CONTEXT_TYPE_MEDIA)
-
-#elif CONFIG_BT_BAP_BROADCAST_24_2_2
-#define BT_BAP_LC3_BROADCAST_PRESET_NRF5340_AUDIO                                                  \
-	BT_BAP_LC3_BROADCAST_PRESET_24_2_2(BT_AUDIO_LOCATION_FRONT_LEFT |                          \
-						   BT_AUDIO_LOCATION_FRONT_RIGHT,                  \
-					   BT_AUDIO_CONTEXT_TYPE_MEDIA)
-
-#else
-#error Unsupported LC3 codec preset for broadcast
-#endif /* CONFIG_BT_AUDIO_BROADCAST_CONFIGURABLE */
-
 static struct bt_cap_broadcast_source *broadcast_source;
 static struct bt_cap_stream cap_streams[CONFIG_BT_BAP_BROADCAST_SRC_STREAM_COUNT];
 static struct bt_bap_lc3_preset lc3_preset = BT_BAP_LC3_BROADCAST_PRESET_NRF5340_AUDIO;
@@ -79,9 +46,9 @@ static bool delete_broadcast_src;
  * (any addition to pba_buf requires an increase of this value)
  */
 NET_BUF_SIMPLE_DEFINE(pba_buf, BT_UUID_SIZE_16 + 8);
-static struct bt_data ext_ad[4];
+static struct bt_data ext_ad[5];
 #else
-static struct bt_data ext_ad[3];
+static struct bt_data ext_ad[4];
 #endif /* (CONFIG_AURACAST) */
 
 static struct bt_data per_ad[1];
@@ -130,6 +97,8 @@ static void stream_started_cb(struct bt_bap_stream *stream)
 
 	/* NOTE: The string below is used by the Nordic CI system */
 	LOG_INF("Broadcast source %p started", (void *)stream);
+
+	le_audio_print_codec(stream->codec_cfg, BT_AUDIO_DIR_SOURCE);
 }
 
 static void stream_stopped_cb(struct bt_bap_stream *stream, uint8_t reason)
@@ -181,10 +150,9 @@ static void public_broadcast_features_set(uint8_t *features)
 		*features |= 0x01;
 	}
 
-	if (freq == BT_AUDIO_CODEC_CONFIG_LC3_FREQ_16KHZ ||
-	    freq == BT_AUDIO_CODEC_CONFIG_LC3_FREQ_24KHZ) {
+	if (freq == BT_AUDIO_CODEC_CFG_FREQ_16KHZ || freq == BT_AUDIO_CODEC_CFG_FREQ_24KHZ) {
 		*features |= 0x02;
-	} else if (freq == BT_AUDIO_CODEC_CONFIG_LC3_FREQ_48KHZ) {
+	} else if (freq == BT_AUDIO_CODEC_CFG_FREQ_48KHZ) {
 		*features |= 0x04;
 	} else {
 		LOG_WRN("%dkHz is not compatible with Auracast, choose 16kHz, 24kHz or 48kHz",
@@ -202,8 +170,16 @@ static int adv_create(void)
 	NET_BUF_SIMPLE_DEFINE_STATIC(brdcst_id_buf, BT_UUID_SIZE_16 + BT_AUDIO_BROADCAST_ID_SIZE);
 	/* Buffer for Appearance */
 	NET_BUF_SIMPLE_DEFINE_STATIC(brdcst_appearance_buf, BT_UUID_SIZE_16);
+	/* Buffer for manufacturer ID */
+	NET_BUF_SIMPLE_DEFINE_STATIC(manufacturer_id_buf, BT_UUID_SIZE_16);
 	/* Buffer for Public Broadcast Announcement */
 	NET_BUF_SIMPLE_DEFINE_STATIC(base_buf, 128);
+
+	net_buf_simple_add_le16(&manufacturer_id_buf, CONFIG_BT_DEVICE_MANUFACTURER_ID);
+
+	ext_ad[0].data_len = manufacturer_id_buf.len;
+	ext_ad[0].type = BT_DATA_UUID16_SOME;
+	ext_ad[0].data = manufacturer_id_buf.data;
 
 	if (IS_ENABLED(CONFIG_BT_AUDIO_USE_BROADCAST_ID_RANDOM)) {
 		ret = bt_cap_initiator_broadcast_get_id(broadcast_source, &broadcast_id);
@@ -216,11 +192,11 @@ static int adv_create(void)
 	}
 
 	if (IS_ENABLED(CONFIG_BT_AUDIO_USE_BROADCAST_NAME_ALT)) {
-		ext_ad[0] = (struct bt_data)BT_DATA(BT_DATA_BROADCAST_NAME,
+		ext_ad[1] = (struct bt_data)BT_DATA(BT_DATA_BROADCAST_NAME,
 						    CONFIG_BT_AUDIO_BROADCAST_NAME_ALT,
 						    sizeof(CONFIG_BT_AUDIO_BROADCAST_NAME_ALT) - 1);
 	} else {
-		ext_ad[0] = (struct bt_data)BT_DATA(BT_DATA_BROADCAST_NAME,
+		ext_ad[1] = (struct bt_data)BT_DATA(BT_DATA_BROADCAST_NAME,
 						    CONFIG_BT_AUDIO_BROADCAST_NAME,
 						    sizeof(CONFIG_BT_AUDIO_BROADCAST_NAME) - 1);
 	}
@@ -229,15 +205,15 @@ static int adv_create(void)
 	net_buf_simple_add_le16(&brdcst_id_buf, BT_UUID_BROADCAST_AUDIO_VAL);
 	net_buf_simple_add_le24(&brdcst_id_buf, broadcast_id);
 
-	ext_ad[1].data_len = brdcst_id_buf.len;
-	ext_ad[1].type = BT_DATA_SVC_DATA16;
-	ext_ad[1].data = brdcst_id_buf.data;
+	ext_ad[2].data_len = brdcst_id_buf.len;
+	ext_ad[2].type = BT_DATA_SVC_DATA16;
+	ext_ad[2].data = brdcst_id_buf.data;
 
 	net_buf_simple_add_le16(&brdcst_appearance_buf, CONFIG_BT_DEVICE_APPEARANCE);
 
-	ext_ad[2].data_len = brdcst_appearance_buf.len;
-	ext_ad[2].type = BT_DATA_GAP_APPEARANCE;
-	ext_ad[2].data = brdcst_appearance_buf.data;
+	ext_ad[3].data_len = brdcst_appearance_buf.len;
+	ext_ad[3].type = BT_DATA_GAP_APPEARANCE;
+	ext_ad[3].data = brdcst_appearance_buf.data;
 
 #if (CONFIG_AURACAST)
 	uint8_t pba_features = 0;
@@ -268,9 +244,9 @@ static int adv_create(void)
 
 	/* If any additional data is to be added, remember to increase NET_BUF size */
 
-	ext_ad[3].data_len = pba_buf.len;
-	ext_ad[3].type = BT_DATA_SVC_DATA16;
-	ext_ad[3].data = pba_buf.data;
+	ext_ad[4].data_len = pba_buf.len;
+	ext_ad[4].type = BT_DATA_SVC_DATA16;
+	ext_ad[4].data = pba_buf.data;
 #endif /* (CONFIG_AURACAST) */
 
 	/* Setup periodic advertising data */
@@ -298,7 +274,7 @@ static void bt_audio_codec_allocation_set(uint8_t *data, uint8_t data_len,
 					  enum bt_audio_location loc)
 {
 	data[0] = data_len - 1;
-	data[1] = BT_AUDIO_CODEC_CONFIG_LC3_CHAN_ALLOC;
+	data[1] = BT_AUDIO_CODEC_CFG_CHAN_ALLOC;
 	sys_put_le32((const uint32_t)loc, &data[2]);
 }
 

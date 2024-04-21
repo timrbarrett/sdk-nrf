@@ -44,3 +44,17 @@ endif()
 if(CONFIG_NCS_SAMPLE_MATTER_SETTINGS_SHELL)
     target_sources(app PRIVATE ${MATTER_COMMONS_SRC_DIR}/persistent_storage/persistent_storage_shell.cpp)
 endif()
+
+if(CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS)
+    target_sources(app PRIVATE ${MATTER_COMMONS_SRC_DIR}/event_triggers/event_triggers.cpp)
+    if(CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS_REGISTER_DEFAULTS)
+        target_sources(app PRIVATE ${MATTER_COMMONS_SRC_DIR}/event_triggers/default_event_triggers.cpp)
+    endif()
+endif()
+
+if(CONFIG_NCS_SAMPLE_MATTER_PERSISTENT_STORAGE)
+    target_sources_ifdef(CONFIG_NCS_SAMPLE_MATTER_SETTINGS_STORAGE_BACKEND app PRIVATE
+            ${MATTER_COMMONS_SRC_DIR}/persistent_storage/backends/persistent_storage_settings.cpp)
+    target_sources_ifdef(CONFIG_NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND app PRIVATE
+            ${MATTER_COMMONS_SRC_DIR}/persistent_storage/backends/persistent_storage_secure.cpp)
+endif()

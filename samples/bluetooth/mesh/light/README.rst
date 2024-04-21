@@ -39,6 +39,7 @@ The configuration overlay :file:`overlay-dfu.conf` enables DFU support in the ap
 
 * nrf52840dk_nrf52840
 * nrf21540dk_nrf52840
+* nrf54l15pdk_nrf54l15_cpuapp
 
 While this overlay configuration is only applicable for the mentioned platforms in this sample, DFU over Bluetooth Low Energy may be used on other platforms as well.
 
@@ -131,12 +132,12 @@ This sample is split into the following source files:
 DFU configuration
 =================
 
-To enable the DFU feature for the supported nRF52 Series development kits, set :makevar:`OVERLAY_CONFIG` to :file:`overlay-dfu.conf` when building the sample.
+To enable the DFU feature for the supported development kits, set :makevar:`EXTRA_CONF_FILE` to :file:`overlay-dfu.conf` when building the sample.
 For example, when building from the command line, use the following command:
 
   .. code-block:: console
 
-     west build -b <BOARD> -p -- -DOVERLAY_CONFIG="overlay-dfu.conf"
+     west build -b <BOARD> -p -- -DEXTRA_CONF_FILE="overlay-dfu.conf"
 
 The configuration overlay :file:`overlay-dfu.conf` enables the DFU feature.
 To review the required configuration alterations, open and inspect the :file:`overlay-dfu.conf` file.

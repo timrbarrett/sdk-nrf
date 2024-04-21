@@ -1,5 +1,3 @@
-:orphan:
-
 .. _known_issues:
 
 Known issues
@@ -351,6 +349,17 @@ Matter
 ======
 
 The issues in this section are related to the :ref:`ug_matter` protocol.
+
+.. rst-class:: v2-6-0
+
+KRKNWK-18769: :ref:`matter_bridge_app` application does not print the hyperlink for displaying the setup QR code in the log.
+  This happens, because the log module that displays this log entry has been disabled.
+
+  **Workaround:** Remove the following line from the :file:`src/chip_project_config.h` header file:
+
+  .. code-block:: C
+
+     #define CHIP_CONFIG_LOG_MODULE_AppServer_PROGRESS 0
 
 .. rst-class:: v2-6-0 v2-5-2 v2-5-1 v2-5-0
 
@@ -875,6 +884,14 @@ Zigbee
 ======
 
 The issues in this section are related to the :ref:`ug_zigbee` protocol.
+
+.. rst-class:: v2-6-0 v2-5-2 v2-5-1 v2-5-0 v2-4-3 v2-4-2 v2-4-1 v2-4-0 v2-3-0 v2-2-0 v2-1-4 v2-1-3 v2-1-2 v2-1-1 v2-1-0 v2-0-2 v2-0-1 v2-0-0
+
+NCSIDB-1213: Subsequent Zigbee FOTA updates fail
+  Once a Zigbee FOTA update is interrupted for any reason, the subsequent updates will fail until a device reboot.
+  This is because :ref:`lib_dfu_target` resources are not freed.
+
+  **Workaround:** Manually cherry-pick and apply commit with fix from ``main`` (commit hash: ``cef8a4b0e5afaed08627bcccbe2ac7b4b600978f``).
 
 .. rst-class:: v2-5-2 v2-5-1 v2-5-0
 
@@ -2584,7 +2601,7 @@ The time returned by :ref:`lib_date_time` library becomes incorrect after one we
   The time returned by :ref:`lib_date_time` library becomes incorrect after one week elapses.
   This is due to an issue with clock_gettime() API.
 
-  **Affected platforms:** nRF9160
+  **Affected platforms:** nRF9160, nRF52840
 
 Subsystems
 **********
@@ -2801,7 +2818,7 @@ The combination of nRF Secure Immutable Bootloader and MCUboot fails to upgrade 
 .. rst-class:: v1-4-2 v1-4-1 v1-4-0
 
 NRF91-989: Unable to bootstrap after changing SIMs
-  In some cases, swapping the SIM card might trigger the bootstrap Pre-Shared Key to be deleted from the device.
+  In some cases, swapping the SIM card might trigger the bootstrap pre-shared key (PSK) to be deleted from the device.
   This can prevent future bootstraps from succeeding.
 
   **Affected platforms:** nRF9160
@@ -3409,6 +3426,14 @@ In addition to the known issues listed here, see also :ref:`softdevice_controlle
 
 .. rst-class:: v2-6-0
 
+DRGN-21619: The controller might assert if the CIS peripheral stops receiving packets from the CIS central
+  This only occurs when the window widening reaches at least half of the ISO interval in magnitude.
+  Assuming worst case clock accuracies on both the central and the peripheral, this could occur with a supervision timeout of 2.4, 3.7, or 4.9 seconds, corresponding to an ISO interval of 5, 7.5, or 10 milliseconds, respectively.
+
+  **Workaround:** Set the supervision timeout to a value lower than those mentioned above.
+
+.. rst-class:: v2-6-0
+
 DRGN-21605: Value read by HCI ISO Read TX Timestamp is off by 40 µs
   The HCI command ``Iso Read Tx Tmestamp`` returns the last assigned sync reference for the ISO TX path and the value might be off by 40 µs.
 
@@ -3420,7 +3445,7 @@ DRGN-21293: The LE Read ISO TX Sync command is implemented according to the rais
   When the CIG or BIG is configured with an ``ISO_Interval`` that equals the ``SDU_Interval``, there is no difference between the CIG or BIG reference anchor point and the SDU synchronization reference.
   If several SDUs are transmitted during each ``ISO_Interval``, meaning that it is larger than the ``SDU_Interval``, our implementation of the LE Read ISO TX Sync command returns a unique SDU synchronization reference for each SDU.
 
-.. rst-class:: v2-6-0 v2-5-2 v2-5-1 v2-5-0 v2-4-2 v2-4-1 v2-4-0 v2-3-0 v2-2-0 v2-1-3 v2-1-2 v2-1-1 v2-1-0 v2-0-2 v2-0-1 v2-0-0 v1-9-2 v1-9-1 v1-9-0 v1-8-0 v1-7-1 v1-7-0 v1-6-1 v1-6-0 v1-5-2 v1-5-1 v1-5-0 v1-4-2 v1-4-1 v1-4-0
+.. rst-class:: v2-6-0 v2-5-2 v2-5-1 v2-5-0 v2-4-3 v2-4-2 v2-4-1 v2-4-0 v2-3-0 v2-2-0 v2-1-3 v2-1-2 v2-1-1 v2-1-0 v2-0-2 v2-0-1 v2-0-0 v1-9-2 v1-9-1 v1-9-0 v1-8-0 v1-7-1 v1-7-0 v1-6-1 v1-6-0 v1-5-2 v1-5-1 v1-5-0 v1-4-2 v1-4-1 v1-4-0
 
 DRGN-20444: The HCI LE Create Connection command and the HCI LE Extended Create Connection command overwrite scan parameters
   This happens when the HCI LE Create Connection command or the HCI LE Extended Create Connection command is called after the scan parameters are set.

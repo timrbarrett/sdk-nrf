@@ -130,7 +130,7 @@ The Matter weather station application does not use a single :file:`prj.conf` fi
 Configuration files are provided for different build types, and they are located in the :file:`configuration/thingy53_nrf5340_cpuapp` directory.
 Before you start testing the application, you can select one of the build types supported by the application.
 
-See :ref:`app_build_additions_build_types` and :ref:`modifying_build_types` for more information about this feature of the |NCS|.
+See :ref:`app_build_additions_build_types` and :ref:`cmake_options` for more information.
 
 The application supports the following build types:
 
@@ -166,6 +166,14 @@ The application comes with the following overlays:
   See `Generating factory data`_ to learn how to put factory data into device's storage.
   To learn more about factory data, read the :doc:`matter:nrfconnect_factory_data_configuration` page in the Matter documentation.
 
+  This overlay requires providing of the :file:`pm_static_factory_data.yml` Partition Manager static configuration file.
+
+  To build the example with the factory data support, run the following command:
+
+  .. code-block:: console
+
+      west build -b thingy53_nrf5340_cpuapp -- -DEXTRA_CONF_FILE=overlay-factory_data.conf -DPM_STATIC_YML_FILE=pm_static_factory_data.yml
+
 .. note::
    Matter factory data support requires the dedicated partition layout.
    This means that if you build the application using the ``overlay-factory_data`` configuration overlay, it will not be compatible with other :ref:`Thingy:53 applications and samples <thingy53_compatible_applications>`.
@@ -181,7 +189,7 @@ Selecting a build type
 ======================
 
 Before you start testing the application, you can select one of the :ref:`matter_weather_station_app_build_types`.
-See :ref:`modifying_build_types` for detailed steps how to select a build type.
+See :ref:`cmake_options` for information about how to select a build type.
 
 Building for the nRF7002 Wi-Fi expansion board
 ==============================================
@@ -215,7 +223,7 @@ You can generate new factory data set when building for the target board by invo
 .. parsed-literal::
    :class: highlight
 
-   west build -b thingy53_nrf5340_cpuapp -- -DOVERLAY_CONFIG=overlay-factory_data.conf
+   west build -b thingy53_nrf5340_cpuapp -- -DEXTRA_CONF_FILE=overlay-factory_data.conf
 
 This command builds the application with default certificates.
 After building the target, the generated :file:`factory_data.hex` file will be merged with the application target HEX file, so you can use the :ref:`regular command to flash it to the device <programming>`.
@@ -311,7 +319,7 @@ The onboarding information representation depends on your commissioner setup.
 For this application, the data payload, which includes the device discriminator and setup PIN code, is encoded and shared using an NFC tag.
 When using the debug configuration, you can also get this type of information from the USB interface logs.
 
-Alternatively, depending on your build type and selected configuration overlay, you can also use one of the following :ref:`onboarding information formats <ug_matter_network_topologies_commissioning_onboarding_formats>` to provide the commissioner with the data required:
+Alternatively, depending on your build type and selected overlay, you can also use one of the following :ref:`onboarding information formats <ug_matter_network_topologies_commissioning_onboarding_formats>` to provide the commissioner with the data required:
 
 * For the debug and release build types:
 

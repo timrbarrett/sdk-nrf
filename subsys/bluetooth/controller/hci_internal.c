@@ -539,6 +539,8 @@ void hci_internal_supported_commands(sdc_hci_ip_supported_commands_t *cmds)
 	cmds->hci_le_enhanced_read_transmit_power_level = 1;
 	cmds->hci_le_read_remote_transmit_power_level = 1;
 	cmds->hci_le_set_transmit_power_reporting_enable = 1;
+	cmds->hci_le_set_path_loss_reporting_parameters = 1;
+	cmds->hci_le_set_path_loss_reporting_enable = 1;
 	/* NOTE: The DTM commands are *not* supported by the SoftDevice
 	 * controller. See doc/nrf/known_issues.rst.
 	 */
@@ -739,6 +741,7 @@ void hci_internal_le_supported_features(
 #if defined(CONFIG_BT_CTLR_LE_POWER_CONTROL)
 	features->params.le_power_control_request = 1;
 	features->params.le_power_change_indication = 1;
+	features->params.le_path_loss_monitoring = 1;
 #endif
 
 #if defined(CONFIG_BT_CTLR_ADV_PERIODIC_ADI_SUPPORT)
@@ -787,8 +790,10 @@ static void le_read_supported_states(uint8_t *buf)
 
 #define ST_SCA (BIT(4)  | BIT(5)  | BIT(8)  | BIT(9)  | BIT(10) | \
 		BIT(11) | BIT(12) | BIT(13) | BIT(14) | BIT(15) | \
-		BIT(22) | BIT(23) | BIT(24) | BIT(25) | BIT(26) | \
+		BIT(24) | BIT(25) | BIT(26) | \
 		BIT(27) | BIT(30) | BIT(31))
+
+#define ST_SCA_INI (BIT(22) | BIT(23))
 
 #define ST_SLA (BIT(2)  | BIT(3)  | BIT(7)  | BIT(10) | BIT(11) | \
 		BIT(14) | BIT(15) | BIT(20) | BIT(21) | BIT(26) | \
@@ -829,11 +834,13 @@ static void le_read_supported_states(uint8_t *buf)
 	states1 &= ~ST_MAS;
 	states2 &= ~ST_MAS2;
 #endif
-	/* All states and combinations supported except:
-	 * Initiating State + Passive Scanning
-	 * Initiating State + Active Scanning
-	 */
-	states1 &= ~(BIT(22) | BIT(23));
+
+#if defined(CONFIG_BT_CTLR_SDC_ALLOW_PARALLEL_SCANNING_AND_INITIATING)
+	states1 |= ST_SCA_INI;
+#else
+	states1 &= ~ST_SCA_INI;
+#endif
+
 	*buf = states1;
 	*(buf + 4) = states2;
 }
@@ -1294,6 +1301,16 @@ static uint8_t le_controller_cmd_put(uint8_t const * const cmd,
 			sizeof(sdc_hci_cmd_le_set_transmit_power_reporting_enable_return_t);
 		return sdc_hci_cmd_le_set_transmit_power_reporting_enable((void *)cmd_params,
 									  (void *)event_out_params);
+
+	case SDC_HCI_OPCODE_CMD_LE_SET_PATH_LOSS_REPORTING_PARAMS:
+		*param_length_out += sizeof(sdc_hci_cmd_le_set_path_loss_reporting_params_return_t);
+		return sdc_hci_cmd_le_set_path_loss_reporting_params((void *)cmd_params,
+								     (void *)event_out_params);
+
+	case SDC_HCI_OPCODE_CMD_LE_SET_PATH_LOSS_REPORTING_ENABLE:
+		*param_length_out += sizeof(sdc_hci_cmd_le_set_path_loss_reporting_enable_return_t);
+		return sdc_hci_cmd_le_set_path_loss_reporting_enable((void *)cmd_params,
+								     (void *)event_out_params);
 #endif
 
 #if defined(CONFIG_BT_CTLR_LE_POWER_CONTROL) || defined(CONFIG_BT_CTLR_ADV_EXT)

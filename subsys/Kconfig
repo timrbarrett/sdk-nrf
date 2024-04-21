@@ -33,5 +33,8 @@ rsource "dm/Kconfig"
 rsource "nrf_security/Kconfig"
 rsource "net_core_monitor/Kconfig"
 rsource "audio_module/Kconfig"
+rsource "uart_async_adapter/Kconfig"
 rsource "trusted_storage/Kconfig"
+rsource "sdfw_services/Kconfig"
+rsource "suit/provisioning/Kconfig"
 endmenu

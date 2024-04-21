@@ -25,7 +25,12 @@ Update operating system
 ***********************
 
 Before you start setting up the toolchain, install available updates for your operating system.
-See :ref:`requirements` for information on the supported operating systems.
+
+.. include:: ./recommended_versions.rst
+    :start-after: os_table_start
+    :end-before: os_table_end
+
+See :ref:`supported_OS` for more information about the tier definitions.
 
 .. _installing_vsc:
 
@@ -34,7 +39,7 @@ See :ref:`requirements` for information on the supported operating systems.
 Install prerequisites
 *********************
 
-Depending on your preferred development environment, install the required tools:
+Depending on your preferred development environment, install the following required tools:
 
 .. tabs::
 
@@ -312,7 +317,7 @@ Set up the command-line build environment
    This step is only required when working on command line with freestanding applications.
 
 In addition to the steps mentioned above, if you want to build and program your application from the command line, you have to set up your command-line build environment by defining the required environment variables every time you open a new command-line or terminal window.
-See :ref:`zephyr:important-build-vars` for more information about the various relevant environment variables.
+See :ref:`zephyr:env_vars_important` in the Zephyr documentation for more information about the various relevant environment variables.
 
 Define the required environment variables as follows, depending on your operating system:
 

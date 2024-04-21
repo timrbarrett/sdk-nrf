@@ -237,10 +237,15 @@ static inline int chan_to_freq(int chan)
 	 * op_class for 5GHz channels as there is no user input
 	 * for these (yet).
 	 */
-	int freq  = ieee80211_chan_to_freq(NULL, 81, chan);
+	int freq = -1;
+	int op_classes[] = {81, 82, 128};
+	int op_classes_size = ARRAY_SIZE(op_classes);
 
-	if (freq <= 0) {
-		freq  = ieee80211_chan_to_freq(NULL, 128, chan);
+	for (int i = 0; i < op_classes_size; i++) {
+		freq = ieee80211_chan_to_freq(NULL, op_classes[i], chan);
+		if (freq > 0) {
+			break;
+		}
 	}
 
 	if (freq <= 0) {
@@ -289,6 +294,7 @@ static int wpas_add_and_config_network(struct wpa_supplicant *wpa_s,
 	int ret;
 	struct add_network_resp resp = {0};
 	char *chan_list = NULL;
+	struct net_eth_addr mac = {0};
 
 	_wpa_cli_cmd_v("remove_network all");
 	ret = z_wpa_ctrl_add_network(&resp);
@@ -314,7 +320,7 @@ static int wpas_add_and_config_network(struct wpa_supplicant *wpa_s,
 		}
 
 		if (chan_list) {
-			_wpa_cli_cmd_v("set_network %d freq_list%s", resp.network_id, chan_list);
+			_wpa_cli_cmd_v("set_network %d scan_freq%s", resp.network_id, chan_list);
 			k_free(chan_list);
 		}
 	}
@@ -396,6 +402,25 @@ static int wpas_add_and_config_network(struct wpa_supplicant *wpa_s,
 			_wpa_cli_cmd_v("set_network %d scan_freq %d",
 				resp.network_id, freq);
 		}
+	}
+
+	memcpy((void *)&mac, params->bssid, WIFI_MAC_ADDR_LEN);
+	if (net_eth_is_addr_broadcast(&mac) ||
+	    net_eth_is_addr_multicast(&mac)) {
+		wpa_printf(MSG_ERROR, "Invalid BSSID. Configuration "
+			   "of multicast or broadcast MAC is not allowed.");
+		ret =  -EINVAL;
+		goto rem_net;
+	}
+
+	if (!net_eth_is_addr_unspecified(&mac)) {
+		char bssid_str[MAC_STR_LEN] = {0};
+
+		snprintf(bssid_str, MAC_STR_LEN, "%02x:%02x:%02x:%02x:%02x:%02x",
+			params->bssid[0], params->bssid[1], params->bssid[2],
+			params->bssid[3], params->bssid[4], params->bssid[5]);
+		_wpa_cli_cmd_v("set_network %d bssid %s",
+				resp.network_id, bssid_str);
 	}
 
 	/* enable and select network */

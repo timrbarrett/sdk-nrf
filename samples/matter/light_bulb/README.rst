@@ -39,7 +39,7 @@ IPv6 network support
 
 The development kits for this sample offer the following IPv6 network support for Matter:
 
-* Matter over Thread is supported for ``nrf52840dk_nrf52840``, ``nrf5340dk_nrf5340_cpuapp``, and ``nrf21540dk_nrf52840``.
+* Matter over Thread is supported for ``nrf52840dk_nrf52840``, ``nrf5340dk_nrf5340_cpuapp``, ``nrf21540dk_nrf52840``, and ``nrf54l15pdk_nrf54l15``.
 * Matter over Wi-Fi is supported for ``nrf5340dk_nrf5340_cpuapp`` with the ``nrf7002ek`` shield attached or for ``nrf7002dk_nrf5340_cpuapp``.
 
 Overview
@@ -85,7 +85,7 @@ The sample does not use a single :file:`prj.conf` file.
 Configuration files are provided for different build types, and they are located in the sample root directory.
 Before you start testing the application, you can select one of the build types supported by the application.
 
-See :ref:`app_build_additions_build_types` and :ref:`modifying_build_types` for more information about this feature of the |NCS|.
+See :ref:`app_build_additions_build_types` and :ref:`cmake_options` for more information.
 
 The sample supports the following build types:
 
@@ -105,10 +105,6 @@ The sample supports the following build types:
      - :file:`prj_release.conf`
      - All from `Requirements`_
      - Release version of the application; can be used to enable only the necessary application functionalities to optimize its performance.
-   * - No DFU
-     - :file:`prj_no_dfu.conf`
-     - nRF52840 DK, nRF5340 DK, nRF7002 DK, and nRF21540 DK
-     - Debug version of the application without Device Firmware Upgrade feature support.
 
 .. matter_light_bulb_sample_configuration_file_types_end
 
@@ -171,7 +167,7 @@ To set up an AWS IoT instance and configure the sample, complete the following s
 
    .. code-block:: console
 
-      west build -p -b nrf7002dk_nrf5340_cpuapp -- -DOVERLAY_CONFIG="overlay-aws-iot-integration.conf"
+      west build -p -b nrf7002dk_nrf5340_cpuapp -- -DEXTRA_CONF_FILE="overlay-aws-iot-integration.conf"
 
 #. Flash the firmware and boot the sample.
 #. |connect_kit|
@@ -241,7 +237,7 @@ Selecting a build type
 ======================
 
 Before you start testing the application, you can select one of the :ref:`matter_light_bulb_build_types`.
-See :ref:`modifying_build_types` for detailed steps how to select a build type.
+See :ref:`cmake_options` for information about how to select a build type.
 
 Testing
 =======
@@ -276,7 +272,7 @@ After building the sample and programming it to your development kit, complete t
       I: Turn Off Action has been initiated
       I: Turn Off Action has been completed
 
-#. Press **Button 1** to initiate the factory reset of the device.
+#. Keep the **Button 1** pressed for more than six seconds to initiate factory reset of the device.
 
 .. _matter_light_bulb_sample_light_switch_tests:
 

@@ -19,7 +19,7 @@ config OPENTHREAD_LIBRARY_AVAILABLE
 	# Switch:
 	# - To `y` when libraries for the current OpenThread revision are provided
 	# - To `n` on the next OpenThread upmerge
-	default y
+	default n
 	depends on OPENTHREAD_THREAD_VERSION_1_3
 	depends on (OPENTHREAD_NORDIC_LIBRARY_MASTER && SOC_NRF52840) || \
 		    OPENTHREAD_NORDIC_LIBRARY_FTD || OPENTHREAD_NORDIC_LIBRARY_MTD
@@ -31,25 +31,7 @@ choice OPENTHREAD_IMPLEMENTATION
 	default OPENTHREAD_LIBRARY if OPENTHREAD_LIBRARY_AVAILABLE
 endchoice
 
-if SOC_SERIES_NRF54LX
-
-#To be removed
-config OBERON_BACKEND
-	bool
-	default y
-
-#To be removed
-config PSA_CRYPTO_DRIVER_OBERON
-	bool
-	default y
-
-#To be removed
-config PSA_CRYPTO_DRIVER_CRACEN
-	bool
-	default y
-
-endif
-if SOC_NRF54H20_ENGA_CPUAPP
+if SOC_NRF54H20_CPUAPP
 
 #To be removed
 config ENTROPY_TEST_PRNG
@@ -268,6 +250,10 @@ config OPENTHREAD_MIN_RECEIVE_ON_AFTER
 config OPENTHREAD_CSL_TIMEOUT
 	int
 	default 20
+
+config OPENTHREAD_CSL_RECEIVER_LOCAL_TIME_SYNC
+	bool
+	default y if NRF_802154_SER_HOST
 
 endif # OPENTHREAD_CSL_RECEIVER
 

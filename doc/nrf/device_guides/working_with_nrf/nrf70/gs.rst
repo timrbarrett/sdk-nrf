@@ -23,6 +23,8 @@ Overview
 ********
 
 The nRF7002 DK (PCA10143) is a single-board development kit for evaluation and development on the nRF7002, a Wi-Fi companion :term:`Integrated Circuit (IC)` to Nordic Semiconductor's nRF5340 System-on-Chip (SoC) host processor.
+It is certified for the Wi-Fi Alliance® `certification program <Wi-Fi Certification_>`_ in the Connectivity, Security, and Optimization categories.
+See :ref:`ug_wifi_certification` for detailed information.
 
 The nRF7002 is an IEEE 802.11ax (Wi-Fi 6) compliant solution that implements the Wi-Fi physical layer and Medium Access Control (MAC) layer protocols.
 It implements the nRF Wi-Fi driver software on the nRF5340 host processor communicating over the QSPI bus.
@@ -30,8 +32,8 @@ It implements the nRF Wi-Fi driver software on the nRF5340 host processor commun
 The nRF5340 host is a dual-core SoC based on the Arm® Cortex®-M33 architecture.
 It has the following features:
 
-* A full-featured Arm Cortex-M33F core with DSP instructions, FPU, and Armv8-M Security Extension, running at up to 128 MHz, referred to as the *application core*.
-* A secondary Arm Cortex-M33 core, with a reduced feature set, running at a fixed 64 MHz, referred to as the *network core*.
+* A full-featured Arm Cortex-M33F core with DSP instructions, FPU, and Armv8-M Security Extension, running at up to 128 MHz, referred to as the application core.
+* A secondary Arm Cortex-M33 core, with a reduced feature set, running at a fixed 64 MHz, referred to as the network core.
 
 The ``nrf7002dk_nrf5340_cpuapp`` build target provides support for the application core on the nRF5340 SoC.
 The ``nrf7002dk_nrf5340_cpunet`` build target provides support for the network core on the nRF5340 SoC.
@@ -143,26 +145,26 @@ The connections and IOs supported by the development kit are listed in this sect
 LED
 ^^^
 
-* LED1 (green) = P1.06
-* LED2 (green) = P1.07
+* **LED 1** (green) = **P1.06**
+* **LED 2** (green) = **P1.07**
 
 Push buttons
 ^^^^^^^^^^^^
 
-* BUTTON1 = SW1 = P1.08
-* BUTTON2 = SW2 = P1.09
-* BOOT = SW5 = boot/reset
+* **Button 1** = **SW1** = **P1.08**
+* **Button 2** = **SW2** = **P1.09**
+* **BOOT** = **SW5** = boot/reset
 
 Wi-Fi control
 ^^^^^^^^^^^^^
 
-* BUCKEN = P0.12
-* IOVDD CONTROL = P0.31
-* HOST IRQ = P0.23
-* COEX_REQ = P0.28
-* COEX_STATUS0 = P0.30
-* COEX_STATUS1 = P0.29
-* COEX_GRANT = P0.24
+* BUCKEN = **P0.12**
+* IOVDD CONTROL = **P0.31**
+* HOST IRQ = **P0.23**
+* COEX_REQ = **P0.28**
+* COEX_STATUS0 = **P0.30**
+* COEX_STATUS1 = **P0.29**
+* COEX_GRANT = **P0.24**
 
 Security components
 -------------------
@@ -210,7 +212,7 @@ Programming the sample
 **********************
 
 You must program and run a precompiled version of the :ref:`wifi_scan_sample` sample on your development kit to test the functions.
-Download the precompiled version of the sample from the nRF7002 DK Downloads page.
+Download the precompiled version of the sample from the `nRF7002 DK Downloads`_ page.
 
 After downloading the zip archive, extract it to a folder of your choice.
 The archive contains the HEX file used to program the sample to your DK.
@@ -220,7 +222,7 @@ To program the precompiled sample to your development kit, complete the followin
 1. Open the Programmer app.
 #. Connect the nRF7002 DK to the computer with a micro-USB cable and turn on the DK.
 
-   **LED5** starts blinking.
+   **LED 5** starts blinking.
 
 #. Click **SELECT DEVICE** and select the DK from the drop-down list.
 

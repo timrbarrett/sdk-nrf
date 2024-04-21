@@ -43,7 +43,7 @@ IPv6 network support
 
 The development kits for this sample offer the following IPv6 network support for Matter:
 
-* Matter over Thread is supported for ``nrf52840dk_nrf52840``, ``nrf5340dk_nrf5340_cpuapp``, and ``nrf21540dk_nrf52840``.
+* Matter over Thread is supported for ``nrf52840dk_nrf52840``, ``nrf5340dk_nrf5340_cpuapp``, ``nrf21540dk_nrf52840``, and ``nrf54l15pdk_nrf54l15``.
 * Matter over Wi-Fi is supported for ``nrf5340dk_nrf5340_cpuapp`` with the ``nrf7002ek`` shield attached or for ``nrf7002dk_nrf5340_cpuapp``.
 
 Overview
@@ -174,7 +174,7 @@ NFC port with antenna attached:
 Matter CLI commands
 ===================
 
-If you build the application using the ``debug`` or ``no_dfu`` build type, you can use a series of commands to control the light switch device.
+If you build the application using the ``debug`` build type, you can use a series of commands to control the light switch device.
 These commands can be sent to one device (unicast) or a group of devices (groupcast).
 
 Unicast commands
@@ -254,7 +254,7 @@ Selecting a build type
 ======================
 
 Before you start testing the application, you can select one of the `Matter light switch build types`_.
-See :ref:`modifying_build_types` for detailed steps how to select a build type.
+See :ref:`cmake_options` for information about how to select a build type.
 
 Testing
 *******

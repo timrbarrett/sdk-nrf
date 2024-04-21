@@ -1,5 +1,3 @@
-:orphan:
-
 .. _ncs_release_notes_changelog:
 
 Changelog for |NCS| v2.6.99
@@ -37,6 +35,11 @@ IDE and tool support
 
 |no_changes_yet_note|
 
+Build and configuration system
+==============================
+
+* Added documentation about the :ref:`file suffix feature from Zephyr <app_build_file_suffixes>` with a related information in the :ref:`migration guide <migration_2.7_recommended>`.
+
 Working with nRF91 Series
 =========================
 
@@ -46,6 +49,11 @@ Working with nRF70 Series
 =========================
 
 |no_changes_yet_note|
+
+Working with nRF54L Series
+==========================
+
+* Added the :ref:`ug_nrf54l15_gs` page.
 
 Working with nRF52 Series
 =========================
@@ -76,12 +84,22 @@ Bluetooth® LE
 Bluetooth Mesh
 --------------
 
-|no_changes_yet_note|
+* Updated:
+
+  * The Kconfig option :kconfig:option:`CONFIG_BT_MESH_DFU_METADATA_ON_BUILD` to no longer depend on the Kconfig option :kconfig:option:`CONFIG_BT_MESH_DFU_METADATA`.
+  * The Kconfig option :kconfig:option:`CONFIG_BT_MESH_DFU_CLI` to no longer enable the Kconfig option :kconfig:option:`CONFIG_BT_MESH_DFU_METADATA_ON_BUILD` by default.
+    The Kconfig option :kconfig:option:`CONFIG_BT_MESH_DFU_METADATA_ON_BUILD` can still be manually enabled.
+  * The JSON file, added to :file:`dfu_application.zip` during the automatic DFU metadata generation, to now contain a field for the ``core_type`` used when encoding the metadata.
 
 Matter
 ------
 
-|no_changes_yet_note|
+* Added:
+
+  * Support for merging the generated factory data HEX file with the firmware HEX file by using the devicetree configuration, when Partition Manager is not enabled in the project.
+  * Support for the unified Persistent Storage API, including the implementation of the PSA Persistent Storage.
+
+* Updated default MRP retry intervals for Thread devices to two seconds to reduce the number of spurious retransmissions in Thread networks.
 
 Matter fork
 +++++++++++
@@ -90,17 +108,25 @@ The Matter fork in the |NCS| (``sdk-connectedhomeip``) contains all commits from
 
 The following list summarizes the most important changes inherited from the upstream Matter:
 
+* Updated:
+
+   * The scripts for factory data generation and related :doc:`matter:nrfconnect_factory_data_configuration` documentation page.
+     Now, you can use a single script to generate both JSON and HEX files that include the factory data.
+     Previously, you would have to do that in two steps using two separate scripts.
+     The older method is still supported for backward compatibility.
+
 |no_changes_yet_note|
 
 Thread
 ------
 
-|no_changes_yet_note|
+* Initial experimental support for nRF54L15 for the Thread CLI and Co-processor samples.
+* Added new :ref:`feature set <thread_ug_feature_sets>` option :kconfig:option:`CONFIG_OPENTHREAD_NORDIC_LIBRARY_RCP`.
 
 Zigbee
 ------
 
-|no_changes_yet_note|
+* Fixed an issue with Zigbee FOTA updates failing after a previous attempt was interrupted.
 
 Gazell
 ------
@@ -110,7 +136,8 @@ Gazell
 Enhanced ShockBurst (ESB)
 -------------------------
 
-|no_changes_yet_note|
+* Added support for the :ref:`zephyr:nrf54h20dk_nrf54h20` and :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` boards.
+* Added fast switching between radio states for the nRF54H20 SoC.
 
 nRF IEEE 802.15.4 radio driver
 ------------------------------
@@ -130,27 +157,58 @@ This section provides detailed lists of changes by :ref:`application <applicatio
 Asset Tracker v2
 ----------------
 
-|no_changes_yet_note|
+* Updated:
+
+  * The MQTT topic name for A-GNSS requests is changed to ``agnss`` for AWS and Azure backends.
+  * GNSS heading is only sent to the cloud when it is considered accurate enough.
 
 Serial LTE modem
 ----------------
 
-|no_changes_yet_note|
+* Removed:
+
+  * Mention of Termite and Teraterm terminal emulators from the documentation.
+    The recommended approach is to use one of the emulators listed on the :ref:`test_and_optimize` page.
+  * Sending GNSS UI service info to nRF Cloud; this is no longer required by the cloud.
+
+* Updated:
+
+  * AT command parsing to utilize the :ref:`at_cmd_custom_readme` library.
 
 nRF5340 Audio
 -------------
 
-|no_changes_yet_note|
+* Updated:
+
+  * Removed the LE Audio controller for nRF5340 library.
+    The only supported controller for LE Audio is :ref:`ug_ble_controller_softdevice`.
+    This enables use of standard tools for building, configuring, and DFU.
 
 nRF Machine Learning (Edge Impulse)
 -----------------------------------
 
-|no_changes_yet_note|
+* Updated the ``ml_runner`` application module to allow running a machine learning model without anomaly support.
 
 nRF Desktop
 -----------
 
-|no_changes_yet_note|
+* Added:
+
+  * Support for the nRF54L15 PDK with the ``nrf54l15pdk_nrf54l15_cpuapp`` board target.
+    The PDK can act as a sample mouse or keyboard.
+    It supports the Bluetooth LE HID data transport and uses SoftDevice Link Layer with Low Latency Packet Mode (LLPM) enabled.
+    The PDK uses MCUboot bootloader built in the direct-xip mode (``MCUBOOT+XIP``) and supports firmware updates using the :ref:`nrf_desktop_dfu`.
+  * The ``nrfdesktop-wheel-qdec`` DT alias support to :ref:`nrf_desktop_wheel`.
+    You must use the alias to specify the QDEC instance used for scroll wheel, if your board supports multiple QDEC instances (for example ``nrf54l15pdk_nrf54l15_cpuapp``).
+    You do not need to define the alias if your board supports only one QDEC instance, because in that case, the wheel module can rely on the ``qdec`` DT label provided by the board.
+
+* Updated:
+
+  * The :kconfig:option:`CONFIG_BT_ADV_PROV_TX_POWER_CORRECTION_VAL` Kconfig option value in the nRF52840 Gaming Mouse configurations with the Fast Pair support.
+    The value is now aligned with the Fast Pair requirements.
+  * Enabled the :ref:`CONFIG_DESKTOP_CONFIG_CHANNEL_OUT_REPORT <config_desktop_app_options>` Kconfig option for the nRF Desktop peripherals with :ref:`nrf_desktop_dfu`.
+    The option mitigates HID report rate drops during DFU image transfer through the nRF Desktop dongle.
+    The output report is also enabled for the ``nrf52kbd_nrf52832`` build target in the debug configuration to maintain consistency with the release configuration.
 
 Thingy:53: Matter weather station
 ---------------------------------
@@ -160,7 +218,12 @@ Thingy:53: Matter weather station
 Matter Bridge
 -------------
 
-|no_changes_yet_note|
+* Added:
+
+   The :kconfig:option:`CONFIG_BRIDGE_BT_MAX_SCANNED_DEVICES` kconfig option to set the maximum number of scanned Bluetooth LE devices.
+   The :kconfig:option:`CONFIG_BRIDGE_BT_SCAN_TIMEOUT_MS` kconfig option to set the scan timeout.
+
+* Updated the implementation of the persistent storage to leverage ``NonSecure``-prefixed methods from the common Persistent Storage module.
 
 IPC radio firmware
 ------------------
@@ -175,22 +238,127 @@ This section provides detailed lists of changes by :ref:`sample <samples>`.
 Bluetooth samples
 -----------------
 
-|no_changes_yet_note|
+* Added the :ref:`bluetooth_isochronous_time_synchronization` sample showcasing time-synchronized processing of isochronous data.
+
+* :ref:`fast_pair_input_device` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`peripheral_lbs` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`bluetooth_central_hids` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`peripheral_hids_mouse` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`peripheral_hids_keyboard` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`central_and_peripheral_hrs` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`direct_test_mode` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+  * Added support for the :ref:`zephyr:nrf54h20dk_nrf54h20` board.
 
 Bluetooth Mesh samples
 ----------------------
 
-|no_changes_yet_note|
+* :ref:`bluetooth_mesh_sensor_client` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`bluetooth_mesh_sensor_server` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+  * Updated:
+
+    * Actions of buttons 1 and 2.
+      They are swapped to align with the elements order.
+    * Log messages to be more informative.
+
+* :ref:`bluetooth_ble_peripheral_lbs_coex` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`bt_mesh_chat` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`bluetooth_mesh_light_switch` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`bluetooth_mesh_silvair_enocean` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`bluetooth_mesh_light_dim` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`bluetooth_mesh_light` sample:
+
+  * Added:
+
+    * Support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+    * Support for DFU over Bluetooth Low Energy for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`ble_mesh_dfu_target` sample:
+
+  * Added a note on how to compile the sample with new Composition Data.
+
+* :ref:`bluetooth_mesh_light_lc` sample:
+
+  * Added a section about the :ref:`occupancy mode <bluetooth_mesh_light_lc_occupancy_mode>`.
 
 Cellular samples
 ----------------
 
-|no_changes_yet_note|
+* :ref:`ciphersuites` sample:
+
+  * Updated the :file:`.pem` certificate for example.com.
+
+* :ref:`location_sample` sample:
+
+  * Removed ESP8266 Wi-Fi DTC and Kconfig overlay files.
+
+* :ref:`modem_shell_application` sample:
+
+  * Added support for sending location data details into nRF Cloud with ``--cloud_details`` command-line option in the ``location`` command.
+  * Removed ESP8266 Wi-Fi DTC and Kconfig overlay files.
+
+* :ref:`nrf_cloud_rest_cell_pos_sample` sample:
+
+  * Removed:
+
+    * The button press interface for enabling the device location card on the nRF Cloud website.
+      The card is now automatically displayed.
+
+  * Added:
+
+    * The :kconfig:option:`CONFIG_REST_CELL_SEND_DEVICE_STATUS` Kconfig option to control sending device status on initial connection.
+
+* :ref:`modem_shell_application` sample:
+
+  * Removed sending GNSS UI service info to nRF Cloud; this is no longer required by the cloud.
+
+* :ref:`nrf_cloud_multi_service` sample:
+
+  * Fixed issue that prevented network connectivity when using Wi-Fi scanning with the nRF91xx.
 
 Cryptography samples
 --------------------
 
-|no_changes_yet_note|
+* Added :ref:`crypto_spake2p` sample.
 
 Debug samples
 -------------
@@ -220,7 +388,31 @@ Keys samples
 Matter samples
 --------------
 
-|no_changes_yet_note|
+* Removed:
+
+  * The :file:`configuration` directory which contained the Partition Manager configuration file.
+    It has been replaced replace with :file:`pm_static_<BOARD>` Partition Manager configuration files for all required target boards in the samples' directories.
+  * The :file:`prj_no_dfu.conf` file.
+  * Support for the ``no_dfu`` build type for the nRF5350 DK, the nRF52840 DK, and the nRF7002 DK.
+
+* Added:
+
+  * Test event triggers to all Matter samples and enabled them by default.
+    By utilizing the test event triggers, you can simulate various operational conditions and responses in your Matter device without the need for external setup.
+
+    To get started with using test event triggers in your Matter samples and to understand the capabilities of this feature, refer to the :ref:`ug_matter_test_event_triggers` page.
+
+  * Support for the nRF54L15 PDK with the ``nrf54l15pdk_nrf54l15_cpuapp`` build target to the following Matter samples:
+
+    * :ref:`matter_template_sample` sample.
+    * :ref:`matter_light_bulb_sample` sample.
+    * :ref:`matter_light_switch_sample` sample.
+    * :ref:`matter_thermostat_sample` sample.
+    * :ref:`matter_window_covering_sample` sample.
+
+* :ref:`matter_lock_sample` sample:
+
+  * Added support for emulation of the nRF7001 Wi-Fi companion IC on the nRF7002 DK.
 
 Multicore samples
 -----------------
@@ -230,12 +422,53 @@ Multicore samples
 Networking samples
 ------------------
 
-|no_changes_yet_note|
+* Updated:
+
+  *  The networking samples to support import of certificates in valid PEM formats.
+
+* :ref:`http_server` sample:
+
+  * Added:
+
+    * ``DNS_SD_REGISTER_TCP_SERVICE`` so that mDNS services can locate and address the server using its hostname.
+    * Support for the :ref:`native simulator <zephyr:native_sim>` board.
+
+  * Updated:
+
+    * Set the value of the :kconfig:option:`CONFIG_POSIX_MAX_FDS` Kconfig option to ``25`` to get the Transport Layer Security (TLS) working.
+    * Set the default value of the :kconfig:option:`HTTP_SERVER_SAMPLE_CLIENTS_MAX` Kconfig option to ``1``.
 
 NFC samples
 -----------
 
-|no_changes_yet_note|
+* :ref:`record_launch_app` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+  * Added support for the :ref:`zephyr:nrf54h20dk_nrf54h20` board.
+
+* :ref:`record_text` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+  * Added support for the :ref:`zephyr:nrf54h20dk_nrf54h20` board.
+
+* :ref:`nfc_shell` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+  * Added support for the :ref:`zephyr:nrf54h20dk_nrf54h20` board.
+
+* :ref:`nrf-nfc-system-off-sample` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+
+* :ref:`nfc_tnep_tag` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+  * Added support for the :ref:`zephyr:nrf54h20dk_nrf54h20` board.
+
+* :ref:`writable_ndef_msg` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+  * Added support for the :ref:`zephyr:nrf54h20dk_nrf54h20` board.
 
 nRF5340 samples
 ---------------
@@ -245,7 +478,21 @@ nRF5340 samples
 Peripheral samples
 ------------------
 
-|no_changes_yet_note|
+* :ref:`radio_test` sample:
+
+  * Updated:
+
+    * The CLI command ``fem tx_power_control <tx_power_control>`` replaces ``fem tx_gain <tx_gain>`` .
+      This change applies to the sample built with the :kconfig:option:`CONFIG_RADIO_TEST_POWER_CONTROL_AUTOMATIC` set to ``n``.
+
+  * Added:
+
+    * Support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
+    * Support for the :ref:`zephyr:nrf54h20dk_nrf54h20` board.
+
+* :ref:`802154_phy_test` sample:
+
+  * Added support for the :ref:`nRF54L15 PDK <ug_nrf54l15_gs>` board.
 
 PMIC samples
 ------------
@@ -265,7 +512,10 @@ Trusted Firmware-M (TF-M) samples
 Thread samples
 --------------
 
-|no_changes_yet_note|
+* Initial experimental support for nRF54L15 for the Thread CLI and Co-processor samples.
+* :ref:`ot_coprocessor_sample` sample:
+
+  * Changed the default :ref:`feature set <thread_ug_feature_sets>` from Master to RCP.
 
 Sensor samples
 --------------
@@ -285,7 +535,8 @@ Wi-Fi samples
 Other samples
 -------------
 
-|no_changes_yet_note|
+* Added the :ref:`coremark_sample` sample that demonstrates how to easily measure a performance of the supported SoCs by running the Embedded Microprocessor Benchmark Consortium (EEMBC) CoreMark benchmark.
+  Included support for the nRF52840 DK, nRF5340 DK, and nRF54L15 PDK.
 
 Drivers
 =======
@@ -305,12 +556,25 @@ This section provides detailed lists of changes by :ref:`library <libraries>`.
 Binary libraries
 ----------------
 
-|no_changes_yet_note|
+.. _lib_bt_ll_acs_nrf53_readme:
+
+* Removed the LE Audio controller for nRF5340 library, which was deprecated in the :ref:`v2.6.0 release <ncs_release_notes_260>`.
+  As mentioned in the :ref:`migration_2.6`, make sure to transition to Nordic Semiconductor's standard :ref:`ug_ble_controller_softdevice` (:ref:`softdevice_controller_iso`).
 
 Bluetooth libraries and services
 --------------------------------
 
-|no_changes_yet_note|
+* :ref:`bt_mesh` library:
+
+  * Updated the :ref:`bt_mesh_light_ctrl_srv_readme` model documentation to explicitly mention the Occupany On event.
+
+* :ref:`bt_enocean_readme` library:
+
+  * Fixed an issue where the sensor data of a certain length was incorrectly parsed as switch commissioning.
+
+* :ref:`bt_fast_pair_readme` library:
+
+  * Added experimental support for a new cryptographical backend that relies on the PSA crypto APIs (:kconfig:option:`CONFIG_BT_FAST_PAIR_CRYPTO_PSA`).
 
 Bootloader libraries
 --------------------
@@ -330,12 +594,68 @@ DFU libraries
 Modem libraries
 ---------------
 
-|no_changes_yet_note|
+* :ref:`nrf_modem_lib_readme`:
+
+  * Fixed an issue with the CFUN hooks when the Modem library is initialized during ``SYS_INIT`` at kernel level and makes calls to the :ref:`nrf_modem_at` interface before the application level initialization is done.
+
+* :ref:`lib_location` library:
+
+  * Added:
+
+    * Convenience function to get :c:struct:`location_data_details` from the :c:struct:`location_event_data`.
+    * Location data details for event :c:enum:`LOCATION_EVT_RESULT_UNKNOWN`.
 
 Libraries for networking
 ------------------------
 
-|no_changes_yet_note|
+* :ref:`lib_wifi_credentials` library:
+
+  * Added:
+
+    * Function :c:func:`wifi_credentials_delete_all` to delete all stored Wi-Fi credentials.
+    * Function :c:func:`wifi_credentials_is_empty` to check if the Wi-Fi credentials storage is empty.
+    * New parameter ``channel`` to the structure :c:struct:`wifi_credentials_header` to store the channel information of the Wi-Fi network.
+
+* :ref:`lib_nrf_cloud` library:
+
+  * Added:
+
+    * Support for Wi-Fi anchor names in the :c:struct:`nrf_cloud_location_result` structure.
+    * The :kconfig:option:`CONFIG_NRF_CLOUD_LOCATION_ANCHOR_LIST` Kconfig option to enable including Wi-Fi anchor names in the location callback.
+    * The :kconfig:option:`CONFIG_NRF_CLOUD_LOCATION_ANCHOR_LIST_BUFFER_SIZE` Kconfig option to control the buffer size used for the anchor names.
+
+  * Updated:
+
+    * Improved FOTA job status reporting.
+    * Deprecated :kconfig:option:`NRF_CLOUD_SEND_SERVICE_INFO_UI` and its related UI Kconfig options.
+    * Deprecated the :c:struct:`nrf_cloud_svc_info_ui` structure contained in the :c:struct:`nrf_cloud_svc_info` structure.
+      nRF Cloud no longer uses the UI section in the shadow.
+
+* :ref:`lib_mqtt_helper` library:
+
+  * Changed the library to read certificates as standard PEM format. Previously the certificates had to be manually converted to string format before compiling the application.
+  * Replaced the ``CONFIG_MQTT_HELPER_CERTIFICATES_FILE`` Kconfig option with :kconfig:option:`CONFIG_MQTT_HELPER_CERTIFICATES_FOLDER`. The new option specifies the folder where the certificates are stored.
+
+* :ref:`lib_nrf_provisioning` library:
+
+  * Added the :c:func:`nrf_provisioning_set_interval` function to set the interval between provisioning attempts.
+
+* :ref:`lib_nrf_cloud_coap` library:
+
+  * Updated to request proprietary PSM mode for ``SOC_NRF9151_LACA`` and ``SOC_NRF9131_LACA`` in addition to ``SOC_NRF9161_LACA``.
+
+  * Added the :c:func:`nrf_cloud_coap_shadow_desired_update` function to allow devices to reject invalid shadow deltas.
+
+* :ref:`lib_lwm2m_client_utils` library:
+
+  * The following initialization functions have been deprecated as these modules are now initialized automatically on boot:
+
+    * :c:func:`lwm2m_init_location`
+    * :c:func:`lwm2m_init_device`
+    * :c:func:`lwm2m_init_cellular_connectivity_object`
+    * :c:func:`lwm2m_init_connmon`
+
+  * :c:func:`lwm2m_init_firmware` is deprecated in favour of :c:func:`lwm2m_init_firmware_cb` that allows application to set a callback to receive FOTA events.
 
 Libraries for NFC
 -----------------
@@ -350,7 +670,12 @@ Security libraries
 Other libraries
 ---------------
 
-|no_changes_yet_note|
+* Added the :ref:`lib_uart_async_adapter` library.
+
+* :ref:`app_event_manager`:
+
+  * Added the :kconfig:option:`CONFIG_APP_EVENT_MANAGER_REBOOT_ON_EVENT_ALLOC_FAIL` Kconfig option.
+    The option allows to select between system reboot or kernel panic on event allocation failure for default event allocator.
 
 Common Application Framework (CAF)
 ----------------------------------
@@ -382,7 +707,7 @@ This section provides detailed lists of changes by :ref:`script <scripts>`.
 MCUboot
 =======
 
-The MCUboot fork in |NCS| (``sdk-mcuboot``) contains all commits from the upstream MCUboot repository up to and including ``11ecbf639d826c084973beed709a63d51d9b684e``, with some |NCS| specific additions.
+The MCUboot fork in |NCS| (``sdk-mcuboot``) contains all commits from the upstream MCUboot repository up to and including ``a4eda30f5b0cfd0cf15512be9dcd559239dbfc91``, with some |NCS| specific additions.
 
 The code for integrating MCUboot into |NCS| is located in the :file:`ncs/nrf/modules/mcuboot` folder.
 
@@ -395,21 +720,21 @@ Zephyr
 
 .. NOTE TO MAINTAINERS: All the Zephyr commits in the below git commands must be handled specially after each upmerge and each nRF Connect SDK release.
 
-The Zephyr fork in |NCS| (``sdk-zephyr``) contains all commits from the upstream Zephyr repository up to and including ``23cf38934c0f68861e403b22bc3dd0ce6efbfa39``, with some |NCS| specific additions.
+The Zephyr fork in |NCS| (``sdk-zephyr``) contains all commits from the upstream Zephyr repository up to and including ``0051731a41fa2c9057f360dc9b819e47b2484be5``, with some |NCS| specific additions.
 
 For the list of upstream Zephyr commits (not including cherry-picked commits) incorporated into nRF Connect SDK since the most recent release, run the following command from the :file:`ncs/zephyr` repository (after running ``west update``):
 
 .. code-block:: none
 
-   git log --oneline 23cf38934c ^a768a05e62
+   git log --oneline 0051731a41 ^23cf38934c
 
 For the list of |NCS| specific commits, including commits cherry-picked from upstream, run:
 
 .. code-block:: none
 
-   git log --oneline manifest-rev ^23cf38934c
+   git log --oneline manifest-rev ^0051731a41
 
-The current |NCS| main branch is based on revision ``23cf38934c`` of Zephyr.
+The current |NCS| main branch is based on revision ``0051731a41`` of Zephyr.
 
 .. note::
    For possible breaking changes and changes between the latest Zephyr release and the current Zephyr version, refer to the :ref:`Zephyr release notes <zephyr_release_notes>`.
@@ -427,7 +752,7 @@ zcbor
 Trusted Firmware-M
 ==================
 
-|no_changes_yet_note|
+* Support PSA PAKE APIs from the PSA Crypto API specification 1.2.
 
 cJSON
 =====
@@ -437,4 +762,25 @@ cJSON
 Documentation
 =============
 
-|no_changes_yet_note|
+* Added:
+
+  * The :ref:`test_framework` section for gathering information about unit tests.
+  * List of :ref:`debugging_tools` on the :ref:`debugging` page.
+  * Recommendation for the use of a :file:`VERSION` file for :ref:`ug_fw_update_image_versions_mcuboot` in the :ref:`ug_fw_update_image_versions` user guide.
+  * The :ref:`ug_coremark` page.
+
+* Updated:
+
+  * The :ref:`cmake_options` section on the :ref:`configuring_cmake` page with the list of most common CMake options and more information about how to provide them.
+  * The table listing the :ref:`boards included in sdk-zephyr <app_boards_names_zephyr>` with the nRF54L15 PDK and nRF54H20 DK boards.
+
+  * The :ref:`ug_wifi_overview` page by separating the information about Wi-Fi certification into its own :ref:`ug_wifi_certification` page under :ref:`ug_wifi`.
+  * The :ref:`ug_bt_mesh_configuring` page with an example of possible entries in the Settings NVS name cache.
+  * The :ref:`lib_security` page to include all security-related libraries.
+  * The trusted storage support table in the :ref:`trusted_storage_in_ncs` section by adding nRF52833 and replacing nRF9160 with nRF91 Series.
+
+  * Reworked the :ref:`ble_rpc` page to be more informative and aligned with the library template.
+
+* Fixed:
+
+  * Replaced the occurrences of the outdated :makevar:`OVERLAY_CONFIG` with the currently used :makevar:`EXTRA_CONF_FILE`.
